@@ -1,0 +1,10 @@
+---
+description: 
+globs: *.tsx
+alwaysApply: false
+---
+- screens are only for showing ui.
+if you need to execute logic , use hooks or custom hooks for it
+
+- screens should be no more then 200 lines length...
+- always prefer to use custom components for reused elements like buttons, headers forms. use components with parametes to re use.

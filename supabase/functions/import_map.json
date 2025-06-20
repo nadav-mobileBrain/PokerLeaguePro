@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "https://deno.land/std@0.133.0/node/buffer.ts": "https://deno.land/std@0.133.0/node/buffer.ts",
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2",
+    "https://esm.sh/svix@1.24.1": "https://esm.sh/npm:svix@1.24.0"
+  }
+}
