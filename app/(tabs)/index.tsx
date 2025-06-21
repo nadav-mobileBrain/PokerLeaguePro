@@ -100,7 +100,6 @@ export default function HomeScreen() {
 
   const ListHeader = () => (
     <View style={styles.headerFooterContainer}>
-      {/* User Info Section */}
       <View style={styles.userInfoSection}>
         {!isClerkLoaded ? (
           <ActivityIndicator size="small" color={appColors.secondaryText} />
@@ -114,8 +113,10 @@ export default function HomeScreen() {
             </View>
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{clerkUser.fullName || "N/A"}</Text>
-              <Text style={styles.userEmail}>
-                {clerkUser.primaryEmailAddress?.emailAddress || "No Email"}
+              <Text style={styles.userHandle}>
+                {clerkUser.username ||
+                  clerkUser.primaryEmailAddress?.emailAddress.split("@")[0] ||
+                  "Player"}
               </Text>
             </View>
             <Pressable
@@ -124,7 +125,7 @@ export default function HomeScreen() {
                 styles.signOutButton,
                 pressed && styles.signOutButtonPressed,
               ]}>
-              <Text style={styles.signOutButtonText}>Sign Out</Text>
+              <Text style={styles.signOutButtonText}>Exit</Text>
             </Pressable>
           </>
         ) : (
@@ -133,8 +134,6 @@ export default function HomeScreen() {
       </View>
 
       <Text style={styles.title}>Home Dashboard</Text>
-
-      {/* Title for the leagues list itself */}
       <Text style={styles.sectionTitle}>Active Leagues</Text>
     </View>
   );
@@ -266,13 +265,13 @@ const styles = StyleSheet.create({
   userInfoSection: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
-    paddingBottom: 15,
     backgroundColor: appColors.chipBlack,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 3,
     borderColor: appColors.accentGold,
-    borderRadius: 12,
-    padding: 15,
+    marginBottom: 20,
+    transform: [{ rotate: "-1deg" }],
     ...Platform.select({
       ios: {
         shadowColor: appColors.accentGold,
@@ -288,35 +287,49 @@ const styles = StyleSheet.create({
   avatarContainer: {
     borderWidth: 3,
     borderColor: appColors.buttonGreen,
-    borderRadius: 35,
-    padding: 3,
-    transform: [{ rotate: "-3deg" }],
+    borderRadius: 30,
+    padding: 2,
+    transform: [{ rotate: "2deg" }],
+    backgroundColor: appColors.background,
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.buttonGreen,
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: appColors.chipBlack,
   },
   userInfoText: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: 12,
     transform: [{ rotate: "1deg" }],
   },
   userName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "900",
     color: appColors.lightText,
     textTransform: "uppercase",
+    marginBottom: 2,
   },
-  userEmail: {
+  userHandle: {
     fontSize: 14,
-    color: appColors.secondaryText,
-    fontWeight: "bold",
+    color: appColors.buttonGreen,
+    fontWeight: "800",
+    fontStyle: "italic",
   },
   signOutButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     backgroundColor: appColors.accentRed,
     borderWidth: 2,
     borderColor: appColors.lightText,
@@ -325,12 +338,12 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 3, height: 3 },
+        shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.5,
         shadowRadius: 0,
       },
       android: {
-        elevation: 6,
+        elevation: 4,
       },
     }),
   },
@@ -341,6 +354,7 @@ const styles = StyleSheet.create({
     color: appColors.lightText,
     fontSize: 14,
     fontWeight: "900",
+    textTransform: "uppercase",
   },
   title: {
     fontSize: 32,
