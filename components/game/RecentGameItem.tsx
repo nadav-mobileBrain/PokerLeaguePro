@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+  Platform,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { RecentGame } from "@/hooks/useRecentGames"; // Import the type
 import appColors from "@/constants/colors";
@@ -39,11 +46,16 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
       : `${item.profit > 0 ? "+" : ""}$${item.profit.toFixed(2)}`;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={navigateToGame}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+      onPress={navigateToGame}>
       <View style={styles.iconContainer}>
         <Image
           source={require("@/assets/icons/cards.png")}
-          style={{ width: 50, height: 50 }}
+          style={styles.icon}
         />
       </View>
       <View style={styles.detailsContainer}>
@@ -69,7 +81,7 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
           {item.game_status}
         </Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -78,40 +90,77 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: appColors.chipBlack,
-    padding: 12,
-    borderRadius: 8,
-    borderColor: appColors.inputBorder,
-    borderWidth: 2,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: appColors.buttonGreen,
     width: 280,
-    marginBottom: 10,
+    marginBottom: 15,
+    transform: [{ rotate: "1deg" }],
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.buttonGreen,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  containerPressed: {
+    transform: [{ rotate: "1deg" }, { scale: 0.98 }],
   },
   iconContainer: {
-    marginRight: 12,
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: appColors.accentGold,
+    borderRadius: 12,
+    padding: 8,
+    backgroundColor: appColors.background,
+    transform: [{ rotate: "-3deg" }],
+  },
+  icon: {
+    width: 40,
+    height: 40,
   },
   detailsContainer: {
     flex: 1,
+    transform: [{ rotate: "-1deg" }],
   },
   gameName: {
-    fontSize: 14,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "900",
     color: appColors.lightText,
+    textTransform: "uppercase",
   },
   leagueName: {
-    fontSize: 13,
+    fontSize: 14,
     color: appColors.secondaryText,
-    marginTop: 2,
+    marginTop: 4,
+    fontWeight: "bold",
   },
   dateText: {
     fontSize: 12,
     color: appColors.secondaryText,
     marginTop: 4,
+    fontWeight: "bold",
+    fontStyle: "italic",
   },
   profitContainer: {
     marginTop: 8,
+    backgroundColor: appColors.background,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    borderWidth: 2,
+    borderColor: appColors.inputBorder,
   },
   profitText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
   },
   profitPositive: {
     color: appColors.buttonGreen,
@@ -124,15 +173,18 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     marginLeft: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     backgroundColor: appColors.background,
+    borderWidth: 2,
+    borderColor: appColors.inputBorder,
+    transform: [{ rotate: "-2deg" }],
   },
   statusText: {
     fontSize: 12,
-    fontWeight: "600",
-    textTransform: "capitalize",
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
   statusInProgress: {
     color: appColors.accentRed,

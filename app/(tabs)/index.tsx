@@ -9,6 +9,8 @@ import {
   Alert,
   FlatList,
   RefreshControl,
+  Platform,
+  Pressable,
 } from "react-native";
 import { useUser, useAuth } from "@clerk/clerk-expo"; // Import useAuth
 import React, { useEffect, useState, useCallback } from "react"; // Add React import
@@ -68,8 +70,11 @@ export default function HomeScreen() {
   };
 
   const renderLeagueItem = ({ item }: { item: League }) => (
-    <TouchableOpacity
-      style={styles.leagueItem}
+    <Pressable
+      style={({ pressed }) => [
+        styles.leagueItem,
+        pressed && styles.leagueItemPressed,
+      ]}
       onPress={() => router.push(`/league/${item.id}`)}>
       {item.banner_url ? (
         <Image source={{ uri: item.banner_url }} style={styles.leagueBanner} />
@@ -90,7 +95,7 @@ export default function HomeScreen() {
         )}
         {/* Add more info like member count if available */}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 
   const ListHeader = () => (
@@ -101,18 +106,26 @@ export default function HomeScreen() {
           <ActivityIndicator size="small" color={appColors.secondaryText} />
         ) : clerkUser ? (
           <>
-            <Image source={{ uri: clerkUser.imageUrl }} style={styles.avatar} />
+            <View style={styles.avatarContainer}>
+              <Image
+                source={{ uri: clerkUser.imageUrl }}
+                style={styles.avatar}
+              />
+            </View>
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{clerkUser.fullName || "N/A"}</Text>
               <Text style={styles.userEmail}>
                 {clerkUser.primaryEmailAddress?.emailAddress || "No Email"}
               </Text>
             </View>
-            <TouchableOpacity
+            <Pressable
               onPress={handleSignOut}
-              style={styles.signOutButton}>
+              style={({ pressed }) => [
+                styles.signOutButton,
+                pressed && styles.signOutButtonPressed,
+              ]}>
               <Text style={styles.signOutButtonText}>Sign Out</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         ) : (
           <Text style={styles.placeholderText}>User not loaded</Text>
@@ -255,87 +268,132 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: appColors.inputBorder,
-    minHeight: 60,
+    backgroundColor: appColors.chipBlack,
+    borderWidth: 3,
+    borderColor: appColors.accentGold,
+    borderRadius: 12,
+    padding: 15,
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.accentGold,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  avatarContainer: {
+    borderWidth: 3,
+    borderColor: appColors.buttonGreen,
+    borderRadius: 35,
+    padding: 3,
+    transform: [{ rotate: "-3deg" }],
   },
   avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginRight: 15,
-    backgroundColor: appColors.chipBlack, // Placeholder background
+    backgroundColor: appColors.chipBlack,
   },
   userInfoText: {
     flex: 1,
+    marginLeft: 15,
+    transform: [{ rotate: "1deg" }],
   },
   userName: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "900",
     color: appColors.lightText,
+    textTransform: "uppercase",
   },
   userEmail: {
     fontSize: 14,
     color: appColors.secondaryText,
+    fontWeight: "bold",
   },
   signOutButton: {
-    marginLeft: "auto", // Push button to the right
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: appColors.accentRed, // Red color for sign out
-    borderRadius: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: appColors.accentRed,
+    borderWidth: 2,
+    borderColor: appColors.lightText,
+    borderRadius: 8,
+    transform: [{ rotate: "2deg" }],
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  signOutButtonPressed: {
+    transform: [{ rotate: "2deg" }, { scale: 0.95 }],
   },
   signOutButtonText: {
     color: appColors.lightText,
-    fontSize: 12,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "900",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "900",
     marginBottom: 20,
     color: appColors.buttonGreen,
-    // Removed paddingHorizontal as it's handled by headerFooterContainer
+    textTransform: "uppercase",
+    transform: [{ rotate: "-1deg" }],
   },
   section: {
     marginBottom: 20,
-    backgroundColor: "transparent", // Make section background transparent
-    padding: 0, // Remove padding, item will handle it
+    backgroundColor: "transparent",
+    padding: 0,
     borderRadius: 8,
-    // Removed shadow styles for consistency, can be added back if needed
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: "800",
+    marginBottom: 15,
     color: appColors.accentGold,
-    // Removed paddingHorizontal as it's handled by headerFooterContainer/section padding
+    textTransform: "uppercase",
+    transform: [{ rotate: "1deg" }],
   },
   placeholderText: {
-    fontSize: 14,
+    fontSize: 16,
     color: appColors.secondaryText,
+    fontWeight: "bold",
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: 18,
     color: appColors.secondaryText,
+    fontWeight: "bold",
   },
   errorText: {
     color: appColors.accentRed,
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center",
     marginBottom: 20,
+    fontWeight: "bold",
   },
   retryButton: {
     backgroundColor: appColors.buttonGreen,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: appColors.lightText,
   },
   retryButtonText: {
     color: appColors.lightText,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
   },
   centeredContainer: {
     // Used for full-screen loading/error states
@@ -354,47 +412,63 @@ const styles = StyleSheet.create({
     minHeight: 300, // Ensure it takes up some space
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "900",
     color: appColors.lightText,
     marginBottom: 10,
+    textTransform: "uppercase",
+    transform: [{ rotate: "-2deg" }],
   },
   emptySubText: {
-    fontSize: 14,
+    fontSize: 16,
     color: appColors.secondaryText,
     textAlign: "center",
+    fontWeight: "bold",
+    transform: [{ rotate: "1deg" }],
   },
   leagueItem: {
     backgroundColor: appColors.chipBlack,
-    borderRadius: 8,
-    borderColor: appColors.primary,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: appColors.buttonGreen,
     overflow: "hidden",
-    width: 280, // Set a fixed width for horizontal items
+    width: 280,
+    transform: [{ rotate: "-1deg" }],
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.buttonGreen,
+        shadowOffset: { width: 5, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  leagueItemPressed: {
+    transform: [{ rotate: "-1deg" }, { scale: 0.98 }],
   },
   leagueBanner: {
     width: "100%",
-    height: 100, // Adjust height as needed
-  },
-  leagueBannerPlaceholder: {
-    width: "100%",
-    height: 100,
-    backgroundColor: appColors.inputBorder, // Placeholder color
-    justifyContent: "center",
-    alignItems: "center",
+    height: 120,
+    borderBottomWidth: 3,
+    borderBottomColor: appColors.buttonGreen,
   },
   leagueInfoContainer: {
     padding: 15,
   },
   leagueName: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "900",
     color: appColors.lightText,
     marginBottom: 5,
+    textTransform: "uppercase",
   },
   leagueDescription: {
     fontSize: 14,
     color: appColors.secondaryText,
+    fontWeight: "bold",
   },
   separator: {
     width: 15, // Use width for horizontal spacing
