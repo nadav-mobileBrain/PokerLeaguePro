@@ -384,7 +384,22 @@ export default function LeagueDetailScreen() {
               {activeGameId ? "Join Game" : "Start New Game"}
             </Text>
           </TouchableOpacity>
-          {/* Add more actions like View Stats, Settings (admin) */}
+          <TouchableOpacity
+            style={styles.secondaryActionButton}
+            onPress={() =>
+              router.push({
+                pathname: "/league-stats",
+                params: { leagueId: league.id },
+              })
+            }>
+            <FontAwesome
+              name="bar-chart"
+              size={20}
+              color={appColors.lightText}
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.actionButtonText}>View Stats</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Member List Section */}
@@ -543,16 +558,21 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginBottom: 20,
+    paddingVertical: 10,
+    backgroundColor: appColors.chipBlack,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: appColors.inputBorder,
   },
   actionButton: {
+    flex: 1,
     flexDirection: "row",
-    backgroundColor: appColors.buttonGreen,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    backgroundColor: appColors.buttonGreen,
+    borderRadius: 8,
   },
   actionButtonDisabled: {
     backgroundColor: appColors.secondaryText,
@@ -564,6 +584,19 @@ const styles = StyleSheet.create({
     color: appColors.lightText,
     fontSize: 16,
     fontWeight: "bold",
+  },
+  secondaryActionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    backgroundColor: appColors.primary, // A different color for secondary actions
+    borderRadius: 8,
+  },
+  buttonIcon: {
+    marginRight: 10,
   },
   memberItem: {
     flexDirection: "row",
@@ -588,5 +621,18 @@ const styles = StyleSheet.create({
     color: appColors.secondaryText,
     textAlign: "center",
     marginTop: 10,
+  },
+  titleContainer: {
+    padding: 20,
+    backgroundColor: appColors.chipBlack, // To make text readable over banner edge
+  },
+  leagueName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: appColors.lightText,
+  },
+  description: {
+    fontSize: 16,
+    color: appColors.lightText,
   },
 });

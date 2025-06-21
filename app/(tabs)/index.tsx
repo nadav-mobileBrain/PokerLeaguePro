@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 10,
-    color: appColors.lightText,
+    color: appColors.accentGold,
     // Removed paddingHorizontal as it's handled by headerFooterContainer/section padding
   },
   placeholderText: {
