@@ -1,9 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { RecentGame } from "@/hooks/useRecentGames"; // Import the type
 import appColors from "@/constants/colors";
-import { FontAwesome } from "@expo/vector-icons";
 
 interface RecentGameItemProps {
   item: RecentGame;
@@ -42,7 +41,10 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={navigateToGame}>
       <View style={styles.iconContainer}>
-        <FontAwesome name="gamepad" size={24} color={appColors.buttonGreen} />
+        <Image
+          source={require("@/assets/icons/cards.png")}
+          style={{ width: 50, height: 50 }}
+        />
       </View>
       <View style={styles.detailsContainer}>
         <Text style={styles.gameName} numberOfLines={1}>

@@ -28,13 +28,29 @@ export default function HomeScreen() {
     leagues,
     isLoading: isLoadingLeagues,
     error: leaguesError,
+    refetch: refetchLeagues,
   } = useUserLeagues(); // Use the leagues hook
   const {
     games: recentGames,
     isLoading: isLoadingGames,
     error: gamesError,
+    refetch: refetchGames,
   } = useRecentGames(); // Use the recent games hook
   const router = useRouter(); // Initialize router
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Parallel fetch
+      await Promise.all([refetchLeagues(), refetchGames()]);
+    } catch (error) {
+      console.error("Failed to refresh data", error);
+      // Optionally show an alert to the user
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetchLeagues, refetchGames]);
 
   const handleSignOut = async () => {
     console.log("Attempting Sign Out...");
@@ -140,7 +156,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Other sections can be added below */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Stats</Text>
           <Text style={styles.placeholderText}>Total P/L: $XXX.XX</Text>
         </View>
@@ -149,7 +165,7 @@ export default function HomeScreen() {
           <Text style={styles.placeholderText}>
             [Game X (Tomorrow), Game Y (Next Week)]
           </Text>
-        </View>
+        </View> */}
       </View>
     );
   };
@@ -185,10 +201,8 @@ export default function HomeScreen() {
       contentContainerStyle={styles.listContentContainer}
       refreshControl={
         <RefreshControl
-          refreshing={false} // Hook likely manages its own loading state
-          onRefresh={() => {
-            /* TODO: Add refresh logic from hook if available */
-          }}
+          refreshing={isRefreshing}
+          onRefresh={onRefresh}
           tintColor={appColors.lightText}
           colors={[appColors.buttonGreen]}
         />
@@ -280,7 +294,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: appColors.lightText,
+    color: appColors.buttonGreen,
     // Removed paddingHorizontal as it's handled by headerFooterContainer
   },
   section: {
