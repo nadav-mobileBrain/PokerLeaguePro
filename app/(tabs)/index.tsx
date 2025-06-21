@@ -125,9 +125,15 @@ export default function HomeScreen() {
           ) : gamesError ? (
             <Text style={styles.errorText}>{gamesError.message}</Text>
           ) : recentGames.length > 0 ? (
-            recentGames.map((game) => (
-              <RecentGameItem key={game.game_id} item={game} />
-            ))
+            <FlatList
+              horizontal
+              data={recentGames}
+              renderItem={({ item }) => <RecentGameItem item={item} />}
+              keyExtractor={(item) => item.game_id}
+              showsHorizontalScrollIndicator={false}
+              ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+              contentContainerStyle={{ paddingVertical: 10 }}
+            />
           ) : (
             <Text style={styles.placeholderText}>No recent games found.</Text>
           )}

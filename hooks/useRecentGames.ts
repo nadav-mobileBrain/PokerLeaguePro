@@ -10,6 +10,7 @@ export interface RecentGame {
   game_created_at: string; // timestamptz
   league_id: string;
   league_name: string;
+  profit: number | null;
 }
 
 export const useRecentGames = () => {

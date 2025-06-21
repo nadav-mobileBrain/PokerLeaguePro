@@ -25,6 +25,20 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
     }
   );
 
+  const profitStyle =
+    item.profit === null || item.profit === undefined
+      ? styles.profitNeutral
+      : item.profit > 0
+      ? styles.profitPositive
+      : item.profit < 0
+      ? styles.profitNegative
+      : styles.profitNeutral;
+
+  const formattedProfit =
+    item.profit === null || item.profit === undefined
+      ? "N/A"
+      : `${item.profit > 0 ? "+" : ""}$${item.profit.toFixed(2)}`;
+
   return (
     <TouchableOpacity style={styles.container} onPress={navigateToGame}>
       <View style={styles.iconContainer}>
@@ -38,6 +52,13 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
           League: {item.league_name}
         </Text>
         <Text style={styles.dateText}>{formattedDate}</Text>
+        {item.profit !== null && (
+          <View style={styles.profitContainer}>
+            <Text style={[styles.profitText, profitStyle]}>
+              {formattedProfit}
+            </Text>
+          </View>
+        )}
       </View>
       <View style={styles.statusContainer}>
         <Text
@@ -61,6 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.chipBlack,
     padding: 12,
     borderRadius: 8,
+    width: 280,
     marginBottom: 10,
   },
   iconContainer: {
@@ -83,6 +105,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: appColors.secondaryText,
     marginTop: 4,
+  },
+  profitContainer: {
+    marginTop: 8,
+  },
+  profitText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  profitPositive: {
+    color: appColors.buttonGreen,
+  },
+  profitNegative: {
+    color: appColors.accentRed,
+  },
+  profitNeutral: {
+    color: appColors.secondaryText,
   },
   statusContainer: {
     marginLeft: 10,
