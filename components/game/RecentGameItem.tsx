@@ -47,12 +47,8 @@ const RecentGameItem: React.FC<RecentGameItemProps> = ({ item }) => {
         />
       </View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.gameName} numberOfLines={1}>
-          {item.game_name}
-        </Text>
-        <Text style={styles.leagueName} numberOfLines={1}>
-          League: {item.league_name}
-        </Text>
+        <Text style={styles.gameName}>{item.game_name}</Text>
+        <Text style={styles.leagueName}>League: {item.league_name}</Text>
         <Text style={styles.dateText}>{formattedDate}</Text>
         {item.profit !== null && (
           <View style={styles.profitContainer}>
@@ -94,7 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gameName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: appColors.lightText,
   },
