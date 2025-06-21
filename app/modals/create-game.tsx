@@ -36,10 +36,17 @@ export default function CreateGameModal() {
       return;
     }
     if (!supabaseProfile?.id) {
+      console.error(
+        "[CreateGame] PRE-FLIGHT CHECK FAILED: supabaseProfile or supabaseProfile.id is missing.",
+        supabaseProfile
+      );
       setError("User profile not loaded. Cannot start game.");
       return;
     }
     const creatorId = supabaseProfile.id;
+    console.log(
+      `[CreateGame] PRE-FLIGHT CHECK PASSED: User ID ${creatorId} and League ID ${leagueId} are present.`
+    );
 
     const finalGameName =
       gameName.trim() || `Game - ${new Date().toLocaleDateString()}`;

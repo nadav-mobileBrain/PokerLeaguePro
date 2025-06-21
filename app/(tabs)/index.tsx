@@ -18,6 +18,8 @@ import { useRouter } from "expo-router"; // Import useRouter
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/store/userStore";
 import appColors from "@/constants/colors"; // Import centralized colors
+import { useRecentGames } from "@/hooks/useRecentGames"; // Import the recent games hook
+import RecentGameItem from "@/components/game/RecentGameItem"; // Import the recent game item component
 
 export default function HomeScreen() {
   const { user: clerkUser } = useUser(); // Keep clerk user for display
@@ -27,6 +29,11 @@ export default function HomeScreen() {
     isLoading: isLoadingLeagues,
     error: leaguesError,
   } = useUserLeagues(); // Use the leagues hook
+  const {
+    games: recentGames,
+    isLoading: isLoadingGames,
+    error: gamesError,
+  } = useRecentGames(); // Use the recent games hook
   const router = useRouter(); // Initialize router
 
   const handleSignOut = async () => {
@@ -103,17 +110,30 @@ export default function HomeScreen() {
     </View>
   );
 
-  const ListFooter = () =>
+  const ListFooter = () => {
     // Render other sections only if leagues are loaded successfully
-    !isLoadingLeagues && !leaguesError && leagues.length > 0 ? (
+    if (isLoadingLeagues) return null; // Don't show footer while leagues are loading
+    if (leaguesError) return null;
+
+    return (
       <View style={styles.headerFooterContainer}>
-        {/* Other sections moved here */}
+        {/* Recent Sessions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Sessions</Text>
-          <Text style={styles.placeholderText}>
-            [Session A, Session B, ...]
-          </Text>
+          {isLoadingGames ? (
+            <ActivityIndicator color={appColors.secondaryText} />
+          ) : gamesError ? (
+            <Text style={styles.errorText}>{gamesError.message}</Text>
+          ) : recentGames.length > 0 ? (
+            recentGames.map((game) => (
+              <RecentGameItem key={game.game_id} item={game} />
+            ))
+          ) : (
+            <Text style={styles.placeholderText}>No recent games found.</Text>
+          )}
         </View>
+
+        {/* Other sections can be added below */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Stats</Text>
           <Text style={styles.placeholderText}>Total P/L: $XXX.XX</Text>
@@ -125,7 +145,8 @@ export default function HomeScreen() {
           </Text>
         </View>
       </View>
-    ) : null;
+    );
+  };
 
   // --- Loading and Error States ---
   if (isLoadingLeagues) {
@@ -153,24 +174,9 @@ export default function HomeScreen() {
 
   // --- Main Render with FlatList as root scroll ---
   return (
-    <FlatList
-      style={styles.container} // Apply container style to FlatList
-      data={leagues}
-      renderItem={renderLeagueItem}
-      keyExtractor={(item) => item.id.toString()}
-      ListHeaderComponent={ListHeader} // Add the header content
-      ListFooterComponent={ListFooter} // Add the footer content
-      ItemSeparatorComponent={() => <View style={styles.separator} />} // Separator between league items
-      ListEmptyComponent={() => (
-        // Container for empty state, includes header implicitly via FlatList structure
-        <View style={styles.emptyListCenteredContainer}>
-          <Text style={styles.emptyText}>No leagues found.</Text>
-          <Text style={styles.emptySubText}>
-            Create one or join using an invite code!
-          </Text>
-          {/* Optional: Add Create/Join buttons here */}
-        </View>
-      )}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.listContentContainer}
       refreshControl={
         <RefreshControl
           refreshing={false} // Hook likely manages its own loading state
@@ -180,9 +186,29 @@ export default function HomeScreen() {
           tintColor={appColors.lightText}
           colors={[appColors.buttonGreen]}
         />
-      }
-      contentContainerStyle={styles.listContentContainer} // Add padding etc. if needed for list itself
-    />
+      }>
+      <ListHeader />
+      {leagues.length > 0 ? (
+        <FlatList
+          horizontal
+          data={leagues}
+          renderItem={renderLeagueItem}
+          keyExtractor={(item) => item.id.toString()}
+          showsHorizontalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          contentContainerStyle={styles.horizontalListContentContainer}
+        />
+      ) : (
+        <View style={styles.emptyListCenteredContainer}>
+          <Text style={styles.emptyText}>No leagues found.</Text>
+          <Text style={styles.emptySubText}>
+            Create one or join using an invite code!
+          </Text>
+          {/* Optional: Add Create/Join buttons here */}
+        </View>
+      )}
+      <ListFooter />
+    </ScrollView>
   );
 }
 
@@ -194,6 +220,10 @@ const styles = StyleSheet.create({
   listContentContainer: {
     // Style for the FlatList's inner container
     paddingBottom: 20, // Add padding at the bottom
+  },
+  horizontalListContentContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   headerFooterContainer: {
     // Container for header/footer content
@@ -249,8 +279,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
-    backgroundColor: appColors.chipBlack,
-    padding: 15,
+    backgroundColor: "transparent", // Make section background transparent
+    padding: 0, // Remove padding, item will handle it
     borderRadius: 8,
     // Removed shadow styles for consistency, can be added back if needed
   },
@@ -316,10 +346,11 @@ const styles = StyleSheet.create({
   },
   leagueItem: {
     backgroundColor: appColors.chipBlack,
-    marginBottom: 0, // Remove marginBottom, use separator instead
     borderRadius: 8,
+    borderColor: appColors.primary,
+    borderWidth: 1,
     overflow: "hidden",
-    marginHorizontal: 20, // Match header/footer padding
+    width: 280, // Set a fixed width for horizontal items
   },
   leagueBanner: {
     width: "100%",
@@ -346,7 +377,6 @@ const styles = StyleSheet.create({
     color: appColors.secondaryText,
   },
   separator: {
-    height: 10, // Use height for spacing instead of margin on items
-    backgroundColor: appColors.background, // Make separator same as background
+    width: 15, // Use width for horizontal spacing
   },
 });

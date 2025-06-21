@@ -27,7 +27,9 @@ export default function SelectPlayersScreen() {
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>(() =>
+    supabaseProfile?.id ? [supabaseProfile.id] : []
+  );
 
   const fetchLeagueMembers = useCallback(async () => {
     if (!leagueId) {
@@ -65,6 +67,13 @@ export default function SelectPlayersScreen() {
       );
       setMembers(formattedMembers);
       console.log("[SelectPlayers] Members fetched:", formattedMembers.length);
+
+      if (
+        supabaseProfile?.id &&
+        !selectedPlayerIds.includes(supabaseProfile.id)
+      ) {
+        setSelectedPlayerIds((prevIds) => [...prevIds, supabaseProfile.id]);
+      }
     } catch (err: any) {
       console.error("[SelectPlayers] Error fetching members:", err);
       setError(err.message || "Failed to load league members.");
@@ -72,7 +81,7 @@ export default function SelectPlayersScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [leagueId]);
+  }, [leagueId, supabaseProfile]);
 
   useEffect(() => {
     fetchLeagueMembers();
