@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  Pressable,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import appColors from "@/constants/colors";
 import { useLeagueStats, StatPlayer } from "@/hooks/useLeagueStats";
 
@@ -22,9 +23,11 @@ const formatCurrency = (amount: number) => {
 const StatCard = ({
   title,
   player,
+  onPress,
 }: {
   title: string;
   player: StatPlayer | null;
+  onPress: () => void;
 }) => {
   if (!player) {
     return (
@@ -35,7 +38,7 @@ const StatCard = ({
     );
   }
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardTextContainer}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.playerName}>{player.display_name}</Text>
@@ -49,13 +52,42 @@ const StatCard = ({
         }}
         style={styles.avatar}
       />
-    </View>
+    </Pressable>
   );
 };
 
 export default function LeagueStatsScreen() {
+  const router = useRouter();
   const { leagueId } = useLocalSearchParams<{ leagueId: string }>();
   const { stats, isLoading, error, refetch } = useLeagueStats(leagueId);
+
+  useEffect(() => {
+    console.log("[LeagueStatsScreen] Mounted with params:", { leagueId });
+  }, [leagueId]);
+
+  useEffect(() => {
+    console.log("[LeagueStatsScreen] Stats updated:", {
+      hasStats: !!stats,
+      hasLeagueLeader: stats?.league_leader !== null,
+      hasTopSingleGame: stats?.top_single_game_profit !== null,
+      error,
+      isLoading,
+    });
+  }, [stats, error, isLoading]);
+
+  const handleCardPress = (
+    statType: "league-leaders" | "top-single-game-profits"
+  ) => {
+    if (!leagueId) return;
+    console.log("[LeagueStatsScreen] Navigating to stats detail:", {
+      statType,
+      leagueId,
+    });
+    router.push({
+      pathname: "/stats/[statType]",
+      params: { leagueId, statType },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -66,6 +98,7 @@ export default function LeagueStatsScreen() {
   }
 
   if (error) {
+    console.error("[LeagueStatsScreen] Error state:", error);
     return (
       <View style={styles.centeredContainer}>
         <Text style={styles.errorText}>{error.message}</Text>
@@ -87,10 +120,15 @@ export default function LeagueStatsScreen() {
       <Stack.Screen options={{ title: "League Statistics" }} />
       {stats && (
         <>
-          <StatCard title="League Leader" player={stats.league_leader} />
+          <StatCard
+            title="League Leader"
+            player={stats.league_leader}
+            onPress={() => handleCardPress("league-leaders")}
+          />
           <StatCard
             title="Top Single Game Profit"
             player={stats.top_single_game_profit}
+            onPress={() => handleCardPress("top-single-game-profits")}
           />
         </>
       )}

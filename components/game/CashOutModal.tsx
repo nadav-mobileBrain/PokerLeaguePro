@@ -4,37 +4,44 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import appColors from "@/constants/colors"; // Assuming you have a colors constant file
 import { FontAwesome } from "@expo/vector-icons";
+import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
 
 interface CashOutModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onSubmit: (finalAmount: number) => void; // Submits the final numeric amount
+  onSuccess: () => void; // Simple callback on success
   userName: string;
+  userId: string;
+  gameId: string;
   totalCashIn: number;
 }
 
 export default function CashOutModal({
   isVisible,
   onClose,
-  onSubmit,
+  onSuccess,
   userName,
+  userId,
+  gameId,
   totalCashIn,
 }: CashOutModalProps) {
   const [finalAmountInput, setFinalAmountInput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Reset input when modal becomes visible or user changes
   useEffect(() => {
     if (isVisible) {
       setFinalAmountInput(""); // Clear input on open
+      setIsLoading(false);
     }
   }, [isVisible, userName]);
 
@@ -45,7 +52,7 @@ export default function CashOutModal({
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const finalAmount = parseFloat(finalAmountInput);
     if (isNaN(finalAmount) || finalAmount < 0) {
       Alert.alert(
@@ -54,7 +61,26 @@ export default function CashOutModal({
       );
       return;
     }
-    onSubmit(finalAmount); // Pass the validated number
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.rpc("cash_out_player", {
+        p_game_id: gameId,
+        p_user_id: userId,
+        p_cash_out_amount: finalAmount,
+      });
+
+      if (error) throw error;
+
+      Alert.alert("Success", `${userName} has been cashed out.`);
+      onSuccess(); // Triggers a refetch on the previous screen
+      onClose(); // Closes the modal
+    } catch (error: any) {
+      console.error("Cash out error:", error);
+      Alert.alert("Error", "Could not process cash out. " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const calculatedProfit = () => {
@@ -77,7 +103,10 @@ export default function CashOutModal({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.centeredView}>
         <View style={styles.modalView}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            disabled={isLoading}>
             <FontAwesome
               name="close"
               size={24}
@@ -98,6 +127,7 @@ export default function CashOutModal({
             keyboardType="numeric"
             placeholder="e.g., 150.50"
             placeholderTextColor={appColors.secondaryText}
+            editable={!isLoading}
           />
 
           {profit !== null && (
@@ -110,8 +140,18 @@ export default function CashOutModal({
             </Text>
           )}
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Confirm Cash Out</Text>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              isLoading && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={isLoading}>
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Confirm Cash Out</Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -200,6 +240,9 @@ const styles = StyleSheet.create({
     elevation: 2,
     width: "100%",
     alignItems: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: appColors.secondaryText,
   },
   submitButtonText: {
     color: "white",

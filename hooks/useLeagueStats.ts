@@ -19,6 +19,7 @@ export const useLeagueStats = (leagueId?: string) => {
 
   const fetchStats = useCallback(async () => {
     if (!leagueId) {
+      console.log("[useLeagueStats] No leagueId provided, skipping fetch");
       return;
     }
 
@@ -27,8 +28,31 @@ export const useLeagueStats = (leagueId?: string) => {
     setError(null);
 
     try {
+      // First check if we have any completed games for this league
+      const { data: gamesCheck, error: gamesError } = await supabase
+        .from("games")
+        .select("id, status")
+        .eq("league_id", leagueId)
+        .eq("status", "completed")
+        .limit(1);
+
+      console.log("[useLeagueStats] Games check:", {
+        hasCompletedGames: gamesCheck && gamesCheck.length > 0,
+        gamesError,
+      });
+
+      if (gamesError) {
+        throw new Error(`Failed to check games: ${gamesError.message}`);
+      }
+
       const { data, error: rpcError } = await supabase.rpc("get_league_stats", {
         p_league_id: leagueId,
+      });
+
+      console.log("[useLeagueStats] RPC response:", {
+        hasData: !!data,
+        data,
+        rpcError,
       });
 
       if (rpcError) throw rpcError;

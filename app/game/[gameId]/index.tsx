@@ -232,7 +232,6 @@ export default function GameScreen() {
   const handleCashInAdded = () => {
     setIsModalVisible(false);
     setSelectedPlayerForModal(null);
-    // Re-fetch data to update totals
     fetchGameData();
   };
 
@@ -249,57 +248,12 @@ export default function GameScreen() {
     setIsCashOutModalVisible(true);
   };
 
-  const handleCashOutSubmit = async (finalAmount: number) => {
-    if (!selectedPlayerForCashOut || !gameId || !supabaseProfile?.id) {
-      Alert.alert("Error", "Missing data for cash out operation.");
-      return;
-    }
-
-    const playerToCashOut = selectedPlayerForCashOut;
-    const totalCashIn = playerToCashOut.total_cash_in;
-    const profit = finalAmount - totalCashIn;
-    const requestingUserId = supabaseProfile.id;
-
-    console.log(
-      `[GameScreen] Attempting cash out for ${playerToCashOut.display_name} (User ID: ${playerToCashOut.user_id})`
-    );
-    setIsProcessingCashOut(true);
-
-    try {
-      const { data: result, error: rpcError } = await supabase.rpc(
-        "record_player_cash_out",
-        {
-          p_game_id: gameId,
-          p_user_id: playerToCashOut.user_id,
-          p_cash_out_amount: finalAmount,
-          p_profit: profit,
-          p_requesting_user_id: requestingUserId,
-        }
-      );
-
-      if (rpcError) throw rpcError;
-
-      console.log("[GameScreen] Cash Out RPC Result:", result);
-      Alert.alert(
-        "Success",
-        `${playerToCashOut.display_name} cash out recorded.`
-      );
-
-      // Close modal and refresh data
-      setIsCashOutModalVisible(false);
-      setSelectedPlayerForCashOut(null);
-      fetchGameData(); // Refresh the list to show updated status
-    } catch (err: any) {
-      console.error("[GameScreen] Error recording cash out:", err);
-      Alert.alert(
-        "Error Recording Cash Out",
-        err.message || "An unexpected error occurred."
-      );
-    } finally {
-      setIsProcessingCashOut(false);
-    }
+  // This function is now just for refreshing data after the modal handles the logic
+  const handleCashOutSuccess = () => {
+    setIsCashOutModalVisible(false); // Close modal
+    setSelectedPlayerForCashOut(null);
+    fetchGameData(); // Refresh game data
   };
-  // --- End Modal Handling (Cash Out) ---
 
   // --- Handle End Game ---
   const handleEndGame = async () => {
@@ -488,6 +442,23 @@ export default function GameScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: gameName }} />
+
+      {/* --- Header with Total Info --- */}
+      <View style={styles.totalInfoContainer}>
+        <Text style={styles.totalInfoText}>
+          Total on Table: ${totalTableCashIn.toFixed(2)}
+        </Text>
+        {allPlayersCashedOut && !isEndingGame && (
+          <TouchableOpacity
+            style={styles.endGameButton}
+            onPress={handleEndGame}>
+            <Text style={styles.endGameButtonText}>End Game</Text>
+          </TouchableOpacity>
+        )}
+        {isEndingGame && <ActivityIndicator color={appColors.buttonGreen} />}
+      </View>
+
+      {/* --- Player List --- */}
       <FlatList
         data={playersData}
         renderItem={renderPlayerItem}
@@ -499,56 +470,31 @@ export default function GameScreen() {
             No players found for this game.
           </Text>
         }
+        contentContainerStyle={styles.listContentContainer}
       />
-      {/* Display Total Cash In (Only for active players) */}
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalLabel}>Active Table Cash:</Text>
-        <Text style={styles.totalAmount}>${totalTableCashIn.toFixed(2)}</Text>
-      </View>
 
-      {/* --- Conditionally Render End Game Button --- */}
-      {allPlayersCashedOut && (
-        <TouchableOpacity
-          style={[styles.endGameButton, isEndingGame && styles.buttonDisabled]}
-          onPress={handleEndGame}
-          disabled={isEndingGame}>
-          {isEndingGame ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.endGameButtonText}>End Game</Text>
-          )}
-        </TouchableOpacity>
-      )}
-      {/* --- End Conditional Button --- */}
-
-      {/* --- Render Add Cash-In Modal --- */}
       {selectedPlayerForModal && (
         <AddCashInModal
           isVisible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          gameId={gameId}
+          gameId={gameId as string}
           userId={selectedPlayerForModal.user_id}
           userName={selectedPlayerForModal.display_name}
+          onClose={() => setIsModalVisible(false)}
           onCashInAdded={handleCashInAdded}
         />
       )}
-      {/* --- End Add Cash-In Modal --- */}
 
-      {/* --- Render Cash Out Modal --- */}
       {selectedPlayerForCashOut && (
         <CashOutModal
           isVisible={isCashOutModalVisible}
-          onClose={() =>
-            !isProcessingCashOut && setIsCashOutModalVisible(false)
-          } // Prevent closing while processing
-          onSubmit={handleCashOutSubmit}
+          onClose={() => setIsCashOutModalVisible(false)}
+          onSuccess={handleCashOutSuccess}
+          gameId={gameId as string}
+          userId={selectedPlayerForCashOut.user_id}
           userName={selectedPlayerForCashOut.display_name}
           totalCashIn={selectedPlayerForCashOut.total_cash_in}
-          // Pass loading state to modal if needed for disabling fields/button
-          // isProcessing={isProcessingCashOut}
         />
       )}
-      {/* --- End Cash Out Modal --- */}
     </View>
   );
 }
@@ -690,5 +636,19 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: appColors.secondaryText, // Grey out when disabled
+  },
+  totalInfoContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+  },
+  totalInfoText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: appColors.lightText,
+  },
+  listContentContainer: {
+    padding: 15,
   },
 });

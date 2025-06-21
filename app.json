@@ -4,7 +4,7 @@
     "slug": "PokerLeaguePro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/app_icon.png",
     "scheme": "pokerleaguepro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

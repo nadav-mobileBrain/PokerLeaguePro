@@ -1,0 +1,8 @@
+---
+description: 
+globs: *.tsx
+alwaysApply: false
+---
+### main design rules
+this app design is 'neo brutalism' .
+every ui element you create should follow this design pattern
