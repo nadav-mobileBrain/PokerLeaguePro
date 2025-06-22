@@ -18,6 +18,8 @@ import { useUserStore } from "@/store/userStore";
 import { League, LeagueMember, UserProfile } from "@/types/database";
 import { FontAwesome } from "@expo/vector-icons"; // For icons
 import appColors from "@/constants/colors"; // Import centralized colors (corrected case)
+import { NeoBrutalButton } from "@/components/ui/NeoBrutalButton";
+import { NeoBrutalCard } from "@/components/ui/NeoBrutalCard";
 
 // Helper function to format currency (example)
 const formatCurrency = (amount: number | null, currencyCode = "USD") => {
@@ -288,7 +290,6 @@ export default function LeagueDetailScreen() {
           colors={[appColors.buttonGreen]}
         />
       }>
-      {/* Dynamic Title using Stack.Screen options */}
       <Stack.Screen options={{ title: league.name || "League Details" }} />
 
       {/* League Banner */}
@@ -302,8 +303,7 @@ export default function LeagueDetailScreen() {
 
       <View style={styles.contentPadding}>
         {/* League Info Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>League Info</Text>
+        <NeoBrutalCard title="League Info">
           <Text style={styles.leagueDescription}>
             {league.description || "No description provided."}
           </Text>
@@ -340,71 +340,66 @@ export default function LeagueDetailScreen() {
             </View>
           )}
           {league.invite_code && (
-            <TouchableOpacity
+            <NeoBrutalButton
               onPress={handleShareInviteCode}
-              style={styles.shareInviteButton}>
-              <FontAwesome
-                name="share-alt"
-                size={16}
-                color={appColors.lightText}
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.shareInviteButtonText}>
-                Share Invite Code
-              </Text>
-            </TouchableOpacity>
+              textStyle={{ color: appColors.card }}
+              text="Share Invite Code"
+              icon={
+                <FontAwesome
+                  name="share-alt"
+                  size={16}
+                  color={appColors.card}
+                />
+              }
+              variant="info"
+            />
           )}
-        </View>
+        </NeoBrutalCard>
 
         {/* Actions Section */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              (isLoading || isCheckingForOpenGame) &&
-                styles.actionButtonDisabled,
-            ]}
+          <NeoBrutalButton
+            variant="primary"
             onPress={handleStartGame}
-            disabled={isLoading || isCheckingForOpenGame}>
-            {isLoading || isCheckingForOpenGame ? (
-              <ActivityIndicator
-                size="small"
-                color={appColors.lightText}
-                style={styles.actionIcon}
-              />
-            ) : (
-              <FontAwesome
-                name={activeGameId ? "sign-in" : "play-circle"}
-                size={20}
-                color={appColors.lightText}
-                style={styles.actionIcon}
-              />
-            )}
-            <Text style={styles.actionButtonText}>
-              {activeGameId ? "Join Game" : "Start New Game"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryActionButton}
+            text={activeGameId ? "Join Game" : "Start New Game"}
+            icon={
+              isLoading || isCheckingForOpenGame ? (
+                <ActivityIndicator size="small" color={appColors.lightText} />
+              ) : (
+                <FontAwesome
+                  name={activeGameId ? "sign-in" : "play-circle"}
+                  size={20}
+                  color={appColors.lightText}
+                />
+              )
+            }
+            disabled={isLoading || isCheckingForOpenGame}
+            style={{ flex: 1, marginRight: 5 }}
+          />
+          <NeoBrutalButton
             onPress={() =>
               router.push({
                 pathname: "/league-stats",
                 params: { leagueId: league.id },
               })
-            }>
-            <FontAwesome
-              name="bar-chart"
-              size={20}
-              color={appColors.lightText}
-              style={styles.buttonIcon}
-            />
-            <Text style={styles.actionButtonText}>View Stats</Text>
-          </TouchableOpacity>
+            }
+            text="View Stats"
+            icon={
+              <FontAwesome
+                name="bar-chart"
+                size={20}
+                color={appColors.lightText}
+              />
+            }
+            variant="secondary"
+            style={{ flex: 1, marginLeft: 5 }}
+          />
         </View>
 
         {/* Member List Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Members ({members.length})</Text>
+        <NeoBrutalCard
+          title={`Members (${members.length})`}
+          variant="secondary">
           {members.length > 0 ? (
             members.map((member) => (
               <View key={member.user_id} style={styles.memberItem}>
@@ -418,13 +413,7 @@ export default function LeagueDetailScreen() {
           ) : (
             <Text style={styles.placeholderText}>No members found.</Text>
           )}
-        </View>
-
-        {/* TODO: Add Games List Section */}
-        {/* <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Recent Games</Text>
-            <Text style={styles.placeholderText}>[Game list]</Text>
-        </View> */}
+        </NeoBrutalCard>
       </View>
     </ScrollView>
   );
@@ -470,26 +459,11 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.chipBlack,
     justifyContent: "center",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: appColors.inputBorder,
+    borderBottomWidth: 2,
+    borderBottomColor: "#000",
   },
   contentPadding: {
     padding: 15,
-  },
-  sectionContainer: {
-    backgroundColor: appColors.sectionBackground,
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: appColors.accentGold, // Use gold for titles
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: appColors.inputBorder,
-    paddingBottom: 5,
   },
   leagueDescription: {
     fontSize: 16,
@@ -502,6 +476,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: appColors.inputBorder,
   },
   inviteCodeRow: {
     marginBottom: 15,
@@ -509,19 +486,22 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 15,
     color: appColors.secondaryText,
-    fontWeight: "500",
+    fontWeight: "bold",
   },
   infoValue: {
     fontSize: 15,
     color: appColors.lightText,
+    fontWeight: "500",
   },
   inviteCodeValueContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: appColors.chipBlack,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#000",
   },
   inviteCodeText: {
     fontSize: 16,
@@ -540,99 +520,42 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: appColors.secondaryText,
   },
-  shareInviteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: appColors.secondaryText,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  shareInviteButtonText: {
-    color: appColors.background,
-    fontSize: 15,
-    fontWeight: "bold",
-  },
   actionsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    backgroundColor: appColors.chipBlack,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: appColors.inputBorder,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    marginHorizontal: 5,
-    backgroundColor: appColors.buttonGreen,
-    borderRadius: 8,
-  },
-  actionButtonDisabled: {
-    backgroundColor: appColors.secondaryText,
-  },
-  actionIcon: {
-    marginRight: 8,
-  },
-  actionButtonText: {
-    color: appColors.lightText,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  secondaryActionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    marginHorizontal: 5,
-    backgroundColor: appColors.primary, // A different color for secondary actions
-    borderRadius: 8,
-  },
-  buttonIcon: {
-    marginRight: 10,
+    justifyContent: "space-between",
+    marginBottom: 20,
   },
   memberItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: appColors.inputBorder,
+    marginBottom: 8,
   },
   memberName: {
     fontSize: 16,
     color: appColors.lightText,
-    fontWeight: "500",
+    fontWeight: "bold",
   },
   memberRole: {
     fontSize: 14,
     color: appColors.secondaryText,
-    fontStyle: "italic",
+    fontWeight: "500",
+    backgroundColor: appColors.chipBlack,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#000",
   },
   placeholderText: {
     fontSize: 14,
     color: appColors.secondaryText,
     textAlign: "center",
     marginTop: 10,
-  },
-  titleContainer: {
-    padding: 20,
-    backgroundColor: appColors.chipBlack, // To make text readable over banner edge
-  },
-  leagueName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: appColors.lightText,
-  },
-  description: {
-    fontSize: 16,
-    color: appColors.lightText,
   },
 });

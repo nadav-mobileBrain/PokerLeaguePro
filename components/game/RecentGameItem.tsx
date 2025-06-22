@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   profitContainer: {
+    width: 100,
     marginTop: 4,
     backgroundColor: appColors.background,
     paddingHorizontal: 6,

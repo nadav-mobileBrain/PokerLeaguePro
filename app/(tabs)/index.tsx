@@ -147,7 +147,7 @@ export default function HomeScreen() {
       <View style={styles.headerFooterContainer}>
         {/* Recent Sessions Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Sessions</Text>
+          <Text style={styles.sectionTitle}>Recent Games</Text>
           {isLoadingGames ? (
             <ActivityIndicator color={appColors.secondaryText} />
           ) : gamesError ? (

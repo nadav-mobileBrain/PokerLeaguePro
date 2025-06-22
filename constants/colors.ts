@@ -9,6 +9,7 @@ const tintColorDark = "#fff";
 // Define app colors based on colors.md and usage
 const appColors = {
   // Core Palette
+  accentBlue: "#2980B9", // Rich blue (info, links, secondary actions)
   background: "#0C0C0C", // Almost black
   cardFeltGreen: "#006400", // Deep casino green (for felt/table elements if needed)
   accentRed: "#C0392B", // Rich red (errors, danger, sign out)
