@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: appColors.lightText,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
   },

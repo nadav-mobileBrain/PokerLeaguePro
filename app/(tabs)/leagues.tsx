@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,35 @@ import { League } from "@/types/database";
 import appColors from "@/constants/colors";
 import { useUserLeagues } from "@/hooks/useUserLeagues"; // Import the hook
 
+const LeagueItem = ({ item, router }: { item: League; router: any }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <TouchableOpacity
+      style={styles.leagueItem}
+      onPress={() => router.push(`/league/${item.id}`)}>
+      <Image
+        source={{
+          uri: imageError
+            ? "https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/1234/cards.png"
+            : item.banner_url ||
+              `https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/${item.id}/banner.jpg`,
+        }}
+        style={styles.leagueBanner}
+        onError={() => setImageError(true)}
+      />
+      <View style={styles.leagueInfoContainer}>
+        <Text style={styles.leagueName}>{item.name}</Text>
+        {item.description && (
+          <Text style={styles.leagueDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 export default function MyLeaguesScreen() {
   const router = useRouter();
   const {
@@ -24,23 +53,7 @@ export default function MyLeaguesScreen() {
   } = useUserLeagues(); // Use the centralized hook
 
   const renderLeagueItem = ({ item }: { item: League }) => (
-    <TouchableOpacity
-      style={styles.leagueItem}
-      onPress={() => router.push(`/league/${item.id}`)}>
-      {item.banner_url ? (
-        <Image source={{ uri: item.banner_url }} style={styles.leagueBanner} />
-      ) : (
-        <View style={styles.leagueBannerPlaceholder} />
-      )}
-      <View style={styles.leagueInfoContainer}>
-        <Text style={styles.leagueName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.leagueDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
+    <LeagueItem item={item} router={router} />
   );
 
   if (isLoading && leagues.length === 0) {

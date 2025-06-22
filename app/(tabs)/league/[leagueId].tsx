@@ -293,13 +293,22 @@ export default function LeagueDetailScreen() {
       <Stack.Screen options={{ title: league.name || "League Details" }} />
 
       {/* League Banner */}
-      {league.banner_url ? (
-        <Image source={{ uri: league.banner_url }} style={styles.bannerImage} />
-      ) : (
-        <View style={styles.bannerPlaceholder}>
-          <FontAwesome name="group" size={50} color={appColors.secondaryText} />
-        </View>
-      )}
+      <Image
+        source={{
+          uri:
+            league.banner_url ||
+            `https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/${league.id}/banner.jpg`,
+        }}
+        style={styles.bannerImage}
+        onError={({ nativeEvent: { error } }) => {
+          // If the league banner fails, use default banner
+          setLeague((prev) => ({
+            ...prev!,
+            banner_url:
+              "https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/1234/cards.png",
+          }));
+        }}
+      />
 
       <View style={styles.contentPadding}>
         {/* League Info Section */}
