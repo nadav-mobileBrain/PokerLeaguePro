@@ -23,6 +23,39 @@ import appColors from "@/constants/colors"; // Import centralized colors
 import { useRecentGames } from "@/hooks/useRecentGames"; // Import the recent games hook
 import RecentGameItem from "@/components/game/RecentGameItem"; // Import the recent game item component
 
+const LeagueItem = ({ item }: { item: League }) => {
+  const [imageError, setImageError] = useState(false);
+  const router = useRouter();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.leagueItem,
+        pressed && styles.leagueItemPressed,
+      ]}
+      onPress={() => router.push(`/league/${item.id}`)}>
+      <Image
+        source={{
+          uri: imageError
+            ? "https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/1234/cards.png"
+            : item.banner_url ||
+              `https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/${item.id}/banner.jpg`,
+        }}
+        style={styles.leagueBanner}
+        onError={() => setImageError(true)}
+      />
+      <View style={styles.leagueInfoContainer}>
+        <Text style={styles.leagueName}>{item.name}</Text>
+        {item.description && (
+          <Text style={styles.leagueDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+        )}
+      </View>
+    </Pressable>
+  );
+};
+
 export default function HomeScreen() {
   const { user: clerkUser } = useUser(); // Keep clerk user for display
   const { signOut, isLoaded: isClerkLoaded } = useAuth(); // Keep clerk auth state
@@ -70,32 +103,7 @@ export default function HomeScreen() {
   };
 
   const renderLeagueItem = ({ item }: { item: League }) => (
-    <Pressable
-      style={({ pressed }) => [
-        styles.leagueItem,
-        pressed && styles.leagueItemPressed,
-      ]}
-      onPress={() => router.push(`/league/${item.id}`)}>
-      {item.banner_url ? (
-        <Image source={{ uri: item.banner_url }} style={styles.leagueBanner} />
-      ) : (
-        <Image
-          source={{
-            uri: "https://uuuetroiqvycucxckwrg.supabase.co/storage/v1/object/public/league-banners/public/1234/cards.png",
-          }}
-          style={styles.leagueBanner}
-        />
-      )}
-      <View style={styles.leagueInfoContainer}>
-        <Text style={styles.leagueName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.leagueDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-        {/* Add more info like member count if available */}
-      </View>
-    </Pressable>
+    <LeagueItem item={item} />
   );
 
   const ListHeader = () => (

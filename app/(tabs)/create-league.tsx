@@ -167,55 +167,81 @@ export default function CreateLeagueScreen() {
           const filePath = `public/${newLeagueId}/${fileName}`; // Use newLeagueId
           const mimeType = `image/${fileExt === "jpg" ? "jpeg" : fileExt}`;
 
-          const base64 = await FileSystem.readAsStringAsync(imageUri, {
-            encoding: "base64",
-          });
-          const { data: uploadData, error: uploadError } =
-            await supabase.storage
-              .from("league-banners")
-              .upload(filePath, toByteArray(base64), {
-                cacheControl: "3600",
-                upsert: true,
-                contentType: mimeType,
-              });
+          // Get pre-signed URL for upload
+          const { data, error: signedUrlError } = await supabase.storage
+            .from("league-banners")
+            .createSignedUploadUrl(filePath);
 
-          if (uploadError) {
-            console.error(
-              "[CreateLeague] Error uploading banner:",
-              uploadError
-            );
-            Alert.alert("Warning", "League created, but banner upload failed.");
-          } else {
-            console.log(
-              "[CreateLeague] Banner uploaded. Path:",
-              uploadData?.path
-            );
-            const { data: urlData } = supabase.storage
-              .from("league-banners")
-              .getPublicUrl(filePath);
-            bannerPublicUrl = urlData?.publicUrl;
-            console.log("[CreateLeague] Banner public URL:", bannerPublicUrl);
+          if (signedUrlError || !data)
+            throw signedUrlError || new Error("Failed to get signed URL");
 
-            // 3. Update League with Banner URL (if upload succeeded)
-            if (bannerPublicUrl) {
-              console.log("[CreateLeague] Updating league with banner URL...");
-              const { error: updateError } = await supabase
-                .from("leagues")
-                .update({ banner_url: bannerPublicUrl })
-                .eq("id", newLeagueId);
-
-              if (updateError) {
-                console.error(
-                  "[CreateLeague] Error updating league banner URL:",
-                  updateError
-                );
-                Alert.alert("Warning", "Failed to link uploaded banner.");
+          // Upload using XMLHttpRequest with direct file data
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                  resolve(xhr.response);
+                } else {
+                  console.error("[CreateLeague] Upload failed:", {
+                    status: xhr.status,
+                    response: xhr.response,
+                    readyState: xhr.readyState,
+                  });
+                  reject(new Error(`Upload failed with status ${xhr.status}`));
+                }
               }
-            } else {
-              console.warn(
-                "[CreateLeague] Could not get public URL for banner."
+            };
+            xhr.onerror = (e) => {
+              console.error("[CreateLeague] XHR Error:", e);
+              reject(new Error("Network error during upload"));
+            };
+
+            xhr.open("PUT", data.signedUrl);
+            xhr.setRequestHeader("Content-Type", mimeType);
+
+            // Read file directly
+            FileSystem.readAsStringAsync(imageUri, {
+              encoding: FileSystem.EncodingType.Base64,
+            })
+              .then((base64Data) => {
+                const binaryString = atob(base64Data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                xhr.send(bytes.buffer);
+              })
+              .catch((error) => {
+                console.error("[CreateLeague] File read error:", error);
+                reject(error);
+              });
+          });
+
+          // Get public URL
+          const { data: urlData } = await supabase.storage
+            .from("league-banners")
+            .getPublicUrl(filePath);
+          bannerPublicUrl = urlData?.publicUrl;
+          console.log("[CreateLeague] Banner public URL:", bannerPublicUrl);
+
+          // 3. Update League with Banner URL (if upload succeeded)
+          if (bannerPublicUrl) {
+            console.log("[CreateLeague] Updating league with banner URL...");
+            const { error: updateError } = await supabase
+              .from("leagues")
+              .update({ banner_url: bannerPublicUrl })
+              .eq("id", newLeagueId);
+
+            if (updateError) {
+              console.error(
+                "[CreateLeague] Error updating league banner URL:",
+                updateError
               );
+              Alert.alert("Warning", "Failed to link uploaded banner.");
             }
+          } else {
+            console.warn("[CreateLeague] Could not get public URL for banner.");
           }
         } catch (uploadError: any) {
           console.error("[CreateLeague] Banner Upload Error:", uploadError);
