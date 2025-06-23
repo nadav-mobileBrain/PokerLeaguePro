@@ -93,13 +93,13 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     borderWidth: 3,
-    borderColor: appColors.buttonGreen,
+    borderColor: appColors.success,
     width: 250,
     marginBottom: 12,
     transform: [{ rotate: "1deg" }],
     ...Platform.select({
       ios: {
-        shadowColor: appColors.buttonGreen,
+        shadowColor: appColors.success,
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 0.5,
         shadowRadius: 0,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginRight: 10,
     borderWidth: 2,
-    borderColor: appColors.accentGold,
+    borderColor: appColors.warning,
     borderRadius: 8,
     padding: 6,
     backgroundColor: appColors.background,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   profitPositive: {
-    color: appColors.buttonGreen,
+    color: appColors.success,
   },
   profitNegative: {
     color: appColors.accentRed,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     color: appColors.accentRed,
   },
   statusCompleted: {
-    color: appColors.buttonGreen,
+    color: appColors.success,
   },
 });
 

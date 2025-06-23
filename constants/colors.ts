@@ -56,7 +56,7 @@ const appColors = {
 
   // Functional Colors
   tabBarBackground: "#1C1C1E",
-  tabBarActiveTint: "#FF6B6B", // Neo-brutal red
+  tabBarActiveTint: "#30D158", // Neo-brutal red
   tabBarInactiveTint: "#8E8E93",
   linkText: "#0A84FF",
   switchTrackColorTrue: "#4CD964",
