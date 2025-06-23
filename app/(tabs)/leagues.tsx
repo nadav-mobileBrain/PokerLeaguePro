@@ -59,7 +59,7 @@ export default function MyLeaguesScreen() {
   if (isLoading && leagues.length === 0) {
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={appColors.buttonGreen} />
+        <ActivityIndicator size="large" color={appColors.success} />
         <Text style={styles.loadingText}>Loading Your Leagues...</Text>
       </View>
     );
@@ -100,7 +100,7 @@ export default function MyLeaguesScreen() {
             refreshing={isLoading} // The hook's loading state can drive the spinner
             onRefresh={onRefresh}
             tintColor={appColors.lightText}
-            colors={[appColors.buttonGreen]}
+            colors={[appColors.success]}
           />
         }
         contentContainerStyle={[
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   joinButton: {
-    backgroundColor: appColors.buttonGreen,
+    backgroundColor: appColors.success,
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 8,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   createLeagueButton: {
-    backgroundColor: appColors.buttonGreen,
+    backgroundColor: appColors.buttonSuccess,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",

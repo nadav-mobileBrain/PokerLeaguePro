@@ -31,15 +31,15 @@ export const NeoBrutalButton: React.FC<NeoBrutalButtonProps> = ({
   const getBackgroundColor = () => {
     switch (variant) {
       case "primary":
-        return appColors.buttonGreen;
+        return appColors.buttonSuccess;
       case "secondary":
         return appColors.accentBlue;
       case "danger":
         return appColors.accentRed;
       case "info":
-        return appColors.accentGold;
+        return appColors.warning;
       default:
-        return appColors.buttonGreen;
+        return appColors.buttonSuccess;
     }
   };
 

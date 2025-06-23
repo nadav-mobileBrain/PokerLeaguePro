@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     color: appColors.lightText,
   },
   imagePickerButton: {
-    backgroundColor: appColors.imagePickerButtonBG,
+    backgroundColor: appColors.buttonSuccess,
     borderWidth: 1,
     borderColor: appColors.inputBorder,
     borderRadius: 8,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   },
   imagePickerButtonText: {
     fontSize: 16,
-    color: appColors.imagePickerButtonText,
+    color: appColors.lightText,
     fontWeight: "500",
   },
   imagePreviewContainer: {
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   removeImageButton: {
-    backgroundColor: appColors.removeImageButtonBG,
+    backgroundColor: appColors.buttonPrimary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -496,12 +496,12 @@ const styles = StyleSheet.create({
   },
   removeImageButtonText: {
     fontSize: 14,
-    color: appColors.removeImageButtonText,
+    color: appColors.buttonPrimary,
     fontWeight: "bold",
   },
   submitButton: {
     marginTop: 20,
-    backgroundColor: appColors.buttonGreen,
+    backgroundColor: appColors.success,
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

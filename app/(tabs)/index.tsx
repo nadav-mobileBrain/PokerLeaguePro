@@ -195,7 +195,7 @@ export default function HomeScreen() {
     // Show a basic loading indicator, header will be added by FlatList later if needed
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={appColors.buttonGreen} />
+        <ActivityIndicator size="large" color={appColors.feltGreen} />
         <Text style={styles.loadingText}>Loading Leagues...</Text>
       </View>
     );
@@ -224,7 +224,7 @@ export default function HomeScreen() {
           refreshing={isRefreshing}
           onRefresh={onRefresh}
           tintColor={appColors.lightText}
-          colors={[appColors.buttonGreen]}
+          colors={[appColors.feltGreen]}
         />
       }>
       <ListHeader />
@@ -277,12 +277,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: appColors.accentGold,
+    borderColor: appColors.accentYellow,
     marginBottom: 20,
     transform: [{ rotate: "-1deg" }],
     ...Platform.select({
       ios: {
-        shadowColor: appColors.accentGold,
+        shadowColor: appColors.accentYellow,
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 0.5,
         shadowRadius: 0,
@@ -294,14 +294,14 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     borderWidth: 3,
-    borderColor: appColors.buttonGreen,
+    borderColor: appColors.feltGreen,
     borderRadius: 30,
     padding: 2,
     transform: [{ rotate: "2deg" }],
     backgroundColor: appColors.background,
     ...Platform.select({
       ios: {
-        shadowColor: appColors.buttonGreen,
+        shadowColor: appColors.feltGreen,
         shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.5,
         shadowRadius: 0,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   userHandle: {
     fontSize: 14,
-    color: appColors.buttonGreen,
+    color: appColors.feltGreen,
     fontWeight: "800",
     fontStyle: "italic",
   },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "900",
     marginBottom: 20,
-    color: appColors.buttonGreen,
+    color: appColors.feltGreen,
     textTransform: "uppercase",
     transform: [{ rotate: "-1deg" }],
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 15,
-    color: appColors.accentGold,
+    color: appColors.accentYellow,
     textTransform: "uppercase",
     transform: [{ rotate: "1deg" }],
   },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   retryButton: {
-    backgroundColor: appColors.buttonGreen,
+    backgroundColor: appColors.feltGreen,
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 8,
@@ -452,13 +452,13 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.chipBlack,
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: appColors.buttonGreen,
+    borderColor: appColors.feltGreen,
     overflow: "hidden",
     width: 280,
     transform: [{ rotate: "-1deg" }],
     ...Platform.select({
       ios: {
-        shadowColor: appColors.buttonGreen,
+        shadowColor: appColors.feltGreen,
         shadowOffset: { width: 5, height: 5 },
         shadowOpacity: 0.5,
         shadowRadius: 0,
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 120,
     borderBottomWidth: 3,
-    borderBottomColor: appColors.buttonGreen,
+    borderBottomColor: appColors.feltGreen,
   },
   leagueInfoContainer: {
     padding: 15,

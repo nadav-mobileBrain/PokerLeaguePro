@@ -18,13 +18,13 @@ export const NeoBrutalCard: React.FC<NeoBrutalCardProps> = ({
   const getBackgroundColor = () => {
     switch (variant) {
       case "primary":
-        return appColors.sectionBackground;
+        return appColors.chipBlack;
       case "secondary":
         return appColors.chipBlack;
       case "dark":
         return "#000";
       default:
-        return appColors.sectionBackground;
+        return appColors.text;
     }
   };
 
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: appColors.accentGold,
+    color: appColors.warning,
     marginBottom: 15,
     borderBottomWidth: 2,
     borderBottomColor: "#000",

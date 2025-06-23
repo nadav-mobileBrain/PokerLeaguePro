@@ -6,42 +6,73 @@
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
-// Define app colors based on colors.md and usage
+/**
+ * Color palette combining poker aesthetics with neo-brutalism design.
+ * Neo-brutalism features:
+ * - High contrast colors
+ * - Raw, unrefined look
+ * - Bold, solid colors
+ * - Sharp shadows and borders
+ */
+
+// Core Palette
 const appColors = {
-  // Core Palette
-  accentBlue: "#2980B9", // Rich blue (info, links, secondary actions)
-  background: "#0C0C0C", // Almost black
-  cardFeltGreen: "#006400", // Deep casino green (for felt/table elements if needed)
-  accentRed: "#C0392B", // Rich red (errors, danger, sign out)
-  accentGold: "#FFD700", // Luxurious gold (highlights, important numbers, section titles)
-  lightText: "#F2F2F2", // Off-white (primary text)
-  secondaryText: "#A0A0A0", // Muted grey (subtext, hints, borders, inactive elements)
-  buttonGreen: "#27AE60", // Fresh green (primary buttons, active elements)
-  chipBlack: "#1C1C1C", // Dark element (card backgrounds, list items, inputs)
+  // Primary Colors
+  background: "#000000", // Pure black for maximum contrast
+  chipBlack: "#1A1A1A", // Slightly lighter black for cards/chips
+  feltGreen: "#006B3C", // Rich poker table green
 
-  // UI Element Specific Aliases (using core palette)
-  inputBackground: "#1C1C1C", // Chip Black
-  inputBorder: "#A0A0A0", // Secondary Text
-  cancelButtonBackground: "#A0A0A0", // Secondary Text
-  switchThumbColor: "#f4f3f4", // Default light thumb
-  switchTrackColorFalse: "#767577", // Default dark track
-  switchTrackColorTrue: "#27AE60", // Button Green
-  imagePickerButtonBG: "#A0A0A0", // Secondary Text
-  imagePickerButtonText: "#0C0C0C", // Background (for contrast)
-  removeImageButtonBG: "#C0392B", // Accent Red
-  removeImageButtonText: "#F2F2F2", // Light Text
-  linkText: "#27AE60", // Button Green
-  tabBarBackground: "#1C1C1C", // Chip Black / Card
-  tabBarActiveTint: "#27AE60", // Button Green / Primary
-  tabBarInactiveTint: "#A0A0A0", // Secondary Text
-  sectionBackground: "#1C1C1C", // Added this line (using Chip Black)
+  // Neo-Brutal Accents
+  accentRed: "#FF3B30", // Vibrant red for errors/warnings
+  accentBlue: "#0A84FF", // Electric blue for interactions
+  accentYellow: "#FFD60A", // Bright yellow for highlights
+  accentPink: "#FF2D55", // Neo-brutal pink for special elements
 
-  // Theme Colors (for react-navigation ThemeProvider)
-  card: "#1C1C1C", // Chip Black
-  text: "#F2F2F2", // Light Text
-  border: "#A0A0A0", // Secondary Text
-  primary: "#27AE60", // Button Green
-  notification: "#C0392B", // Accent Red
+  // Text Colors
+  lightText: "#FFFFFF", // Pure white for maximum readability
+  secondaryText: "#8E8E93", // Neutral gray for secondary information
+
+  // UI Elements
+  buttonPrimary: "#FF6B6B", // Neo-brutal red for primary actions
+  buttonSecondary: "#4ECDC4", // Teal for secondary actions
+  buttonDanger: "#FF4949", // Bright red for dangerous actions
+  buttonSuccess: "#2ECC71", // Bright green for success states
+
+  // Card & Input Elements
+  cardBackground: "#1C1C1E", // Dark surface for cards
+  inputBackground: "#2C2C2E", // Slightly lighter for input fields
+  inputBorder: "#3A3A3C", // Border color for inputs
+
+  // Status Colors
+  success: "#4CD964", // Neo-brutal green
+  error: "#FF3B30", // Neo-brutal red
+  warning: "#FFCC00", // Neo-brutal yellow
+  info: "#5856D6", // Neo-brutal purple
+
+  // Game Elements
+  pokerChipPrimary: "#FF453A", // Red chip
+  pokerChipSecondary: "#30D158", // Green chip
+  pokerChipTertiary: "#0A84FF", // Blue chip
+
+  // Functional Colors
+  tabBarBackground: "#1C1C1E",
+  tabBarActiveTint: "#FF6B6B", // Neo-brutal red
+  tabBarInactiveTint: "#8E8E93",
+  linkText: "#0A84FF",
+  switchTrackColorTrue: "#4CD964",
+  switchTrackColorFalse: "#3A3A3C",
+  switchThumbColor: "#FFFFFF",
+
+  // Theme Colors (for react-navigation)
+  card: "#1C1C1E",
+  text: "#FFFFFF",
+  border: "#3A3A3C",
+  primary: "#FF6B6B",
+  notification: "#FF3B30",
+
+  // Neo-brutal Shadows (use these in components)
+  shadowLight: "#FFFFFF33",
+  shadowDark: "#00000066",
 };
 
 export default appColors;

@@ -253,7 +253,7 @@ export default function LeagueDetailScreen() {
   if (isLoading && !refreshing) {
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={appColors.buttonGreen} />
+        <ActivityIndicator size="large" color={appColors.buttonSuccess} />
       </View>
     );
   }
@@ -287,7 +287,7 @@ export default function LeagueDetailScreen() {
           refreshing={refreshing}
           onRefresh={onRefresh}
           tintColor={appColors.lightText}
-          colors={[appColors.buttonGreen]}
+          colors={[appColors.buttonSuccess]}
         />
       }>
       <Stack.Screen options={{ title: league.name || "League Details" }} />
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   retryButton: {
-    backgroundColor: appColors.buttonGreen,
+    backgroundColor: appColors.buttonSuccess,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
   },
   inviteCodeText: {
     fontSize: 16,
-    color: appColors.accentGold,
+    color: appColors.warning,
     fontWeight: "bold",
     letterSpacing: 1,
     marginRight: 10,
