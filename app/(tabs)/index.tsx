@@ -59,6 +59,7 @@ const LeagueItem = ({ item }: { item: League }) => {
 export default function HomeScreen() {
   const { user: clerkUser } = useUser(); // Keep clerk user for display
   const { signOut, isLoaded: isClerkLoaded } = useAuth(); // Keep clerk auth state
+  const { clearSupabaseProfile } = useUserStore(); // Get clearSupabaseProfile from store
   const {
     leagues,
     isLoading: isLoadingLeagues,
@@ -90,10 +91,18 @@ export default function HomeScreen() {
   const handleSignOut = async () => {
     console.log("Attempting Sign Out...");
     try {
+      // Clear local state first
+      clearSupabaseProfile();
+      // Then sign out from Clerk
       await signOut();
       console.log("Sign Out successful");
       // No need to navigate here, RootLayout useEffect will handle redirect
     } catch (err: any) {
+      // If error is "signed_out", it means we're already signed out, which is fine
+      if (err.errors?.[0]?.code === "signed_out") {
+        console.log("Already signed out, proceeding...");
+        return;
+      }
       console.error("Error signing out:", JSON.stringify(err, null, 2));
       Alert.alert(
         "Sign Out Error",
