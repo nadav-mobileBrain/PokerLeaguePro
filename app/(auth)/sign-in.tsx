@@ -1,27 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Text,
   View,
   StyleSheet,
   TouchableOpacity,
   Alert,
-  TextInput,
-  Button,
   ActivityIndicator,
-  Keyboard,
-  TouchableWithoutFeedback,
+  Platform,
+  Image,
 } from "react-native";
-import { useSignIn, useOAuth } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { useOAuth } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { FontAwesome } from "@expo/vector-icons";
 import appColors from "@/constants/colors";
 
-// Recommended practise, use a hook for the redirect URL
+// Recommended practice, use a hook for the redirect URL
 const useWarmUpBrowser = () => {
   React.useEffect(() => {
-    // Warm up the browser to avoid delays
     WebBrowser.warmUpAsync();
     return () => {
       WebBrowser.coolDownAsync();
@@ -30,73 +27,22 @@ const useWarmUpBrowser = () => {
 };
 
 export default function SignInScreen() {
-  useWarmUpBrowser(); // Warm up browser
-  const { signIn, setActive, isLoaded } = useSignIn();
+  useWarmUpBrowser();
   const router = useRouter();
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
-
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [loading, setLoading] = useState(false);
-
-  const onSignInPress = async () => {
-    if (!isLoaded) return;
-    console.log("Attempting Sign In with:", emailAddress);
-    try {
-      setLoading(true);
-      const signInAttempt = await signIn.create({
-        identifier: emailAddress,
-        password,
-      });
-
-      if (signInAttempt.status === "complete") {
-        await setActive({ session: signInAttempt.createdSessionId });
-        console.log("Sign In Complete, session active.");
-        router.replace("/(tabs)/" as any);
-      } else {
-        console.error(
-          "Sign In Status Not Complete:",
-          JSON.stringify(signInAttempt, null, 2)
-        );
-        alert(
-          "Sign in process not complete. Please check logs or handle other factors."
-        );
-      }
-    } catch (err: any) {
-      console.error("Sign In Error:", JSON.stringify(err, null, 2));
-      alert(err.errors?.[0]?.message || "Error during sign in.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = React.useState(false);
 
   const onOAuthSignInPress = React.useCallback(async () => {
     try {
-      // Define the redirect URL for the OAuth flow
+      setLoading(true);
       const redirectUrl = Linking.createURL("/auth-callback");
-      console.log("OAuth Redirect URL:", redirectUrl);
-
-      const { createdSessionId, signIn, signUp, setActive } =
-        await startOAuthFlow({ redirectUrl });
-      console.log("OAuth Flow Result:", {
-        createdSessionId,
-        signInStatus: signIn?.status,
-        signUpStatus: signUp?.status,
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl,
       });
 
       if (createdSessionId && setActive) {
-        // If createdSessionId exists, user signed in successfully
         await setActive({ session: createdSessionId });
-        console.log("OAuth session activated successfully.");
-        router.replace("/(tabs)/" as any); // Navigate to main app
-      } else {
-        // Handle other scenarios like sign-up completion needed (rare with Google)
-        // Or errors within the flow not caught by the catch block
-        console.warn(
-          "OAuth flow finished, but no session ID created or setActive missing."
-        );
-        // You might need specific handling for signIn?.firstFactorVerification etc.
-        // if MFA or other steps are required, but typically not for Google OAuth.
+        router.replace("/(tabs)/" as any);
       }
     } catch (err: any) {
       console.error("OAuth error:", JSON.stringify(err, null, 2));
@@ -104,121 +50,116 @@ export default function SignInScreen() {
         "Sign In Error",
         err.errors?.[0]?.message || "Could not sign in with Google."
       );
+    } finally {
+      setLoading(false);
     }
   }, [startOAuthFlow, router]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.contentContainer}>
+        <Image
+          source={require("@/assets/icons/app_icon.png")}
+          style={styles.appIcon}
+          resizeMode="contain"
+        />
         <Text style={styles.header}>PokerLeaguePro</Text>
-        <Text style={styles.description}>Sign In or Sign Up</Text>
+        <Text style={styles.description}>Welcome to the Game</Text>
 
         {loading ? (
-          <ActivityIndicator
-            style={styles.spinner}
-            color={appColors.buttonGreen}
-          />
+          <ActivityIndicator size="large" color={appColors.feltGreen} />
         ) : (
-          <>
-            <View style={[styles.verticallySpaced, styles.mt20]}>
-              <Button
-                title="Sign in"
-                disabled={loading}
-                onPress={onSignInPress}
-                color={appColors.buttonGreen}
-              />
-            </View>
-            {/* <View style={styles.verticallySpaced}>
-              <Button
-                title="Sign up"
-                disabled={loading}
-                onPress={() => router.push("/(auth)/sign-up")}
-                color={appColors.secondaryText}
-              />
-            </View> */}
-            <View style={styles.verticallySpaced}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={onOAuthSignInPress}>
-                <FontAwesome
-                  name="google"
-                  size={18}
-                  color="#ffffff"
-                  style={styles.icon}
-                />
-                <Text style={styles.buttonText}>Sign in with Google</Text>
-              </TouchableOpacity>
-            </View>
-          </>
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={onOAuthSignInPress}
+            activeOpacity={0.8}>
+            <FontAwesome
+              name="google"
+              size={24}
+              color={appColors.accentYellow}
+              style={styles.icon}
+            />
+            <Text style={styles.buttonText}>Continue with Google</Text>
+          </TouchableOpacity>
         )}
       </View>
-    </TouchableWithoutFeedback>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "center",
     backgroundColor: appColors.background,
+    justifyContent: "center",
+    padding: 20,
+  },
+  contentContainer: {
+    alignItems: "center",
+    transform: [{ rotate: "-2deg" }],
+  },
+  appIcon: {
+    width: 180,
+    height: 180,
+    marginBottom: 20,
+    transform: [{ rotate: "4deg" }],
+    borderWidth: 4,
+    borderColor: appColors.accentYellow,
+    borderRadius: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.success,
+        shadowOffset: { width: 8, height: 8 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
   header: {
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 42,
+    fontWeight: "900",
+    color: appColors.success,
     marginBottom: 10,
-    color: appColors.lightText,
+    textTransform: "uppercase",
+    letterSpacing: 2,
   },
   description: {
-    fontSize: 16,
-    textAlign: "center",
+    fontSize: 24,
+    color: appColors.accentYellow,
     marginBottom: 40,
-    color: appColors.secondaryText,
+    fontWeight: "700",
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: appColors.secondaryText,
-  },
-  input: {
-    backgroundColor: appColors.inputBackground,
-    borderWidth: 1,
-    borderColor: appColors.inputBorder,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: appColors.lightText,
-  },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: "stretch",
-  },
-  mt20: {
-    marginTop: 20,
-  },
-  spinner: {
-    marginTop: 20,
-  },
-  button: {
+  googleButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#4285F4",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    marginBottom: 20,
-    alignSelf: "stretch",
+    backgroundColor: appColors.accentBlue,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: appColors.success,
+    transform: [{ rotate: "2deg" }],
+    ...Platform.select({
+      ios: {
+        shadowColor: appColors.success,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
   icon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   buttonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: appColors.success,
+    fontSize: 20,
+    fontWeight: "800",
   },
 });
