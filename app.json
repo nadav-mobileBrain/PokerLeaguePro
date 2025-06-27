@@ -7,12 +7,13 @@
     "icon": "./assets/icons/app_icon.png",
     "scheme": "pokerleaguepro",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pokerleaguepro.app"
     },
     "android": {
+      "package": "com.pokerleaguepro.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -38,6 +39,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "591a784e-2258-4156-9cfc-b0d0ba0bb106"
+      }
     }
   }
 }

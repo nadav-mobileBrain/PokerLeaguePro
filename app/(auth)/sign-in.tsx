@@ -11,7 +11,7 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-import { useSSO } from "@clerk/clerk-expo";
+import { useOAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
@@ -33,7 +33,7 @@ const useWarmUpBrowser = () => {
 export default function SignInScreen() {
   useWarmUpBrowser();
   const router = useRouter();
-  const { startSSOFlow } = useSSO();
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const [isLoading, setIsLoading] = useState(false);
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -42,31 +42,33 @@ export default function SignInScreen() {
   const handleGoogleSignIn = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await startSSOFlow({
-        strategy: "oauth_google",
+      const { createdSessionId, setActive, signUp } = await startOAuthFlow({
         redirectUrl: Linking.createURL("/oauth-native-callback"),
       });
 
-      if (!result) return;
+      if (createdSessionId) {
+        await setActive!({ session: createdSessionId });
 
-      const { createdSessionId, setActive } = result;
-      const userId = result.signIn?.id || result.signUp?.id;
+        // Get user ID from signUp if it's a new user
+        const userId = signUp?.createdUserId;
 
-      if (createdSessionId && setActive && userId) {
-        await setActive({ session: createdSessionId });
+        if (userId) {
+          // Check if user exists in our database
+          const { data: existingUser } = await supabase
+            .from("users")
+            .select("display_name")
+            .eq("clerk_id", userId)
+            .single();
 
-        // Check if user exists in our database
-        const { data: existingUser } = await supabase
-          .from("users")
-          .select("display_name")
-          .eq("clerk_id", userId)
-          .single();
-
-        if (!existingUser) {
-          // New user - show nickname modal
-          setClerkId(userId);
-          setShowNicknameModal(true);
+          if (!existingUser) {
+            // New user - show nickname modal
+            setClerkId(userId);
+            setShowNicknameModal(true);
+          } else {
+            router.replace("/(tabs)");
+          }
         } else {
+          // Existing user, no need for nickname
           router.replace("/(tabs)");
         }
       }
@@ -79,7 +81,7 @@ export default function SignInScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [startOAuthFlow]);
 
   const handleNicknameSubmit = async () => {
     const trimmedNickname = nickname.trim();
