@@ -22,6 +22,7 @@ import { useUserStore } from "@/store/userStore";
 import appColors from "@/constants/colors"; // Import centralized colors
 import { useRecentGames } from "@/hooks/useRecentGames"; // Import the recent games hook
 import RecentGameItem from "@/components/game/RecentGameItem"; // Import the recent game item component
+import { Fonts } from "@/constants/fonts";
 
 const LeagueItem = ({ item }: { item: League }) => {
   const [imageError, setImageError] = useState(false);
@@ -59,7 +60,7 @@ const LeagueItem = ({ item }: { item: League }) => {
 export default function HomeScreen() {
   const { user: clerkUser } = useUser(); // Keep clerk user for display
   const { signOut, isLoaded: isClerkLoaded } = useAuth(); // Keep clerk auth state
-  const { clearSupabaseProfile } = useUserStore(); // Get clearSupabaseProfile from store
+  const { supabaseProfile, clearSupabaseProfile } = useUserStore(); // Get clearSupabaseProfile from store
   const {
     leagues,
     isLoading: isLoadingLeagues,
@@ -124,16 +125,18 @@ export default function HomeScreen() {
           <>
             <View style={styles.avatarContainer}>
               <Image
-                source={{ uri: clerkUser.imageUrl }}
+                source={{
+                  uri:
+                    supabaseProfile?.avatar_url ||
+                    clerkUser.imageUrl ||
+                    "default_avatar_url",
+                }}
                 style={styles.avatar}
               />
             </View>
             <View style={styles.userInfoText}>
-              <Text style={styles.userName}>{clerkUser.fullName || "N/A"}</Text>
-              <Text style={styles.userHandle}>
-                {clerkUser.username ||
-                  clerkUser.primaryEmailAddress?.emailAddress.split("@")[0] ||
-                  "Player"}
+              <Text style={styles.userName}>
+                {supabaseProfile?.display_name || clerkUser.fullName || "N/A"}
               </Text>
             </View>
             <Pressable
@@ -374,6 +377,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
+    fontFamily: Fonts.body_lg.fontFamily,
     fontSize: 32,
     fontWeight: "900",
     marginBottom: 20,
@@ -388,7 +392,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontFamily: Fonts.body_lg.fontFamily,
+    fontSize: Fonts.body_lg.fontSize,
     fontWeight: "800",
     marginBottom: 15,
     color: appColors.accentYellow,

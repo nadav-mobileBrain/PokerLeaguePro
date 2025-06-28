@@ -40,13 +40,18 @@ SplashScreen.preventAutoHideAsync();
 
 function InitialLayout() {
   const { isLoaded, isSignedIn, userId: clerkUserId } = useAuth();
-  const { fetchSupabaseProfile, clearSupabaseProfile, supabaseProfile, onboardingCompleted } =
-    useUserStore();
+  const {
+    fetchSupabaseProfile,
+    clearSupabaseProfile,
+    supabaseProfile,
+    onboardingCompleted,
+  } = useUserStore();
   const segments = useSegments();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    BlackOpsOne: require("../assets/fonts/BlackOpsOne-Regular.ttf"),
   });
 
   useEffect(() => {
@@ -68,7 +73,7 @@ function InitialLayout() {
       } else {
         // If onboarding is complete and user is in auth group, move them to the main app.
         if (inAuthGroup) {
-          router.replace("/(tabs)/");
+          router.replace("/(tabs)/" as any);
         }
       }
     } else {
@@ -115,7 +120,10 @@ function InitialLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/sign-in" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)/onboarding" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(auth)/onboarding"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="modals/join-by-code"
           options={{

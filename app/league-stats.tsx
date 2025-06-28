@@ -12,6 +12,7 @@ import {
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import appColors from "@/constants/colors";
 import { useLeagueStats, StatPlayer } from "@/hooks/useLeagueStats";
+import { Fonts } from "@/constants/fonts";
 
 const formatCurrency = (amount: number) => {
   return `$${amount.toLocaleString(undefined, {
@@ -169,18 +170,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 14,
+    ...Fonts.body_sm,
     color: appColors.secondaryText,
     marginBottom: 4,
   },
   playerName: {
+    ...Fonts.h2,
     fontSize: 22,
-    fontWeight: "bold",
     color: appColors.lightText,
     marginBottom: 4,
   },
   profitText: {
-    fontSize: 18,
+    ...Fonts.body_lg,
     color: appColors.lightText,
   },
   avatar: {
