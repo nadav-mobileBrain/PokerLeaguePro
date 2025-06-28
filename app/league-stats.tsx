@@ -92,7 +92,7 @@ export default function LeagueStatsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={appColors.buttonGreen} />
+        <ActivityIndicator size="large" color={appColors.feltGreen} />
       </View>
     );
   }

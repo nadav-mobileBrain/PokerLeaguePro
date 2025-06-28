@@ -67,7 +67,7 @@ export default function StatDetailsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={appColors.buttonGreen} />
+        <ActivityIndicator size="large" color={appColors.feltGreen} />
       </View>
     );
   }
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   profitPositive: {
-    color: appColors.buttonGreen,
+    color: appColors.feltGreen,
   },
   profitNegative: {
     color: appColors.accentRed,

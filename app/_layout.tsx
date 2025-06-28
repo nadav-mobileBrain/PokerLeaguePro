@@ -40,7 +40,7 @@ SplashScreen.preventAutoHideAsync();
 
 function InitialLayout() {
   const { isLoaded, isSignedIn, userId: clerkUserId } = useAuth();
-  const { fetchSupabaseProfile, clearSupabaseProfile, supabaseProfile } =
+  const { fetchSupabaseProfile, clearSupabaseProfile, supabaseProfile, onboardingCompleted } =
     useUserStore();
   const segments = useSegments();
   const router = useRouter();
@@ -51,43 +51,45 @@ function InitialLayout() {
 
   useEffect(() => {
     console.log("[Clerk Layout Effect] Running...");
-    console.log(
-      "[Clerk Layout Effect] fontsLoaded:",
-      fontsLoaded,
-      "clerkLoaded:",
-      isLoaded,
-      "isSignedIn:",
-      isSignedIn
-    );
-    console.log("[Clerk Layout Effect] Segments:", segments);
-
     if (!fontsLoaded || !isLoaded) {
       console.log("[Clerk Layout Effect] Waiting for Fonts/Clerk...");
       return;
     }
 
     const inAuthGroup = segments[0] === "(auth)";
-    console.log("[Clerk Layout Effect] In Auth Group:", inAuthGroup);
 
-    if (!isSignedIn && !inAuthGroup) {
-      console.log(
-        "[Clerk Layout Effect] User is NOT signed in, redirecting to sign-in..."
-      );
-      router.replace("/(auth)/sign-in" as any);
-    } else if (isSignedIn && inAuthGroup) {
-      console.log(
-        "[Clerk Layout Effect] User is signed in AND in auth group, redirecting to tabs..."
-      );
-      router.replace("/(tabs)/" as any);
+    if (isSignedIn) {
+      if (!onboardingCompleted) {
+        // If onboarding is not complete, redirect to the onboarding screen,
+        // but only if not already there.
+        if (segments[1] !== "onboarding") {
+          router.replace("/(auth)/onboarding");
+        }
+      } else {
+        // If onboarding is complete and user is in auth group, move them to the main app.
+        if (inAuthGroup) {
+          router.replace("/(tabs)/");
+        }
+      }
     } else {
-      console.log("[Clerk Layout Effect] No redirect needed.");
+      // If user is not signed in, and not in the auth group, redirect to sign-in.
+      if (!inAuthGroup) {
+        router.replace("/(auth)/sign-in");
+      }
     }
 
     if (fontsLoaded && isLoaded) {
       console.log("[Clerk Layout Effect] Hiding splash screen.");
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, isLoaded, isSignedIn, segments, router]);
+  }, [
+    fontsLoaded,
+    isLoaded,
+    isSignedIn,
+    segments,
+    router,
+    onboardingCompleted,
+  ]);
 
   useEffect(() => {
     if (isSignedIn && clerkUserId) {
@@ -113,6 +115,7 @@ function InitialLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/sign-in" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/onboarding" options={{ headerShown: false }} />
         <Stack.Screen
           name="modals/join-by-code"
           options={{
@@ -121,7 +124,7 @@ function InitialLayout() {
           }}
         />
         <Stack.Screen
-          name="modals/create-session"
+          name="modals/create-game"
           options={{
             presentation: "modal",
             title: "Start New Session",

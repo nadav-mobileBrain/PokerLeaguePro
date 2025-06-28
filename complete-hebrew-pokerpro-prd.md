@@ -138,7 +138,6 @@ Poker players who organize regular cash games with friends lack an easy way to t
 
 ### 4.2 Backend Infrastructure
 
-
 - Database architecture
   - PostgreSQL via Supabase for all data storage
   - Materialized views for pre-calculated statistics
@@ -1842,3 +1841,260 @@ Whether you're running a casual weekly game or a serious home cash league, Poker
 Download now and discover who really is the shark at your poker table!
 
 Note: PokerLeaguePro is designed for statistical tracking only and does not facilitate gambling or monetary transactions. All games and transactions should be conducted in accordance with local laws.
+
+'## 12. User Onboarding'
+
+### 12.1 Onboarding Flow Overview
+
+The onboarding process is designed to get users quickly engaged with the core functionality while allowing them to defer non-essential setup steps. The flow prioritizes immediate value delivery over comprehensive profile completion.
+
+### 12.2 Post-Authentication Onboarding Steps
+
+#### Step 1: Nickname Setup Modal (Optional)
+
+- **Trigger**: Immediately after successful authentication for new users
+- **Content**:
+  - Welcome message explaining the purpose of nicknames in poker leagues
+  - Text input for nickname/display name
+  - Character limit indicator (2-20 characters)
+  - Real-time validation feedback
+  - Two action buttons:
+    - "Set Nickname" (primary action)
+    - "I'll do this later" (secondary action)
+- **Behavior**:
+  - If nickname is set: Continue to Step 2
+  - If "I'll do this later" is selected: Continue to Step 2 with default display name from auth provider
+  - Modal can be dismissed by tapping outside (treated as "I'll do this later")
+- **Persistence**: Users who skip this step will see a nickname reminder in their profile until they set one
+
+#### Step 2: Welcome Tour (Progressive Disclosure)
+
+- **Screen 1: Welcome & Value Proposition**
+  - App logo and welcome message
+  - Brief explanation of core value: "Track your poker games with friends"
+  - Continue button
+- **Screen 2: League Concept Introduction**
+  - Visual representation of a league (group of friends)
+  - Explanation: "Create or join leagues to track games with your poker groups"
+  - Example: "Work poker night, weekend home games, etc."
+  - Continue button
+- **Screen 3: Session Tracking Overview**
+  - Visual of buy-in/cash-out process
+  - Explanation: "Record buy-ins and cash-outs at the end of each session"
+  - Emphasis on simplicity: "No need to track every hand"
+  - Continue button
+- **Screen 4: Statistics Preview**
+  - Sample charts and leaderboard
+  - Explanation: "See who's really winning over time"
+  - Get Started button
+
+#### Step 3: First Action Choice
+
+- **Purpose**: Get users immediately engaged with core functionality
+- **Options Presented**:
+  - **"Create My First League"** (Primary recommendation)
+    - Emphasized as the best way to get started
+    - Leads to simplified league creation flow
+  - **"Join an Existing League"**
+    - For users who were invited or have a league code
+    - Leads to league joining flow
+  - **"Explore the App First"**
+    - For users who want to see the interface
+    - Leads to main app with tutorial overlays available
+- **Visual Design**: Card-based layout with clear call-to-action buttons
+
+### 12.3 Simplified League Creation Flow (First-Time Users)
+
+When users choose to create their first league, they enter a streamlined flow:
+
+#### Screen 1: League Basics
+
+- League name input (required)
+- Brief description (optional, with helpful placeholder text)
+- Default settings pre-filled (can be changed later)
+- Continue button
+
+#### Screen 2: Initial Settings
+
+- Default buy-in amount
+- Currency selection (auto-detected based on locale)
+- Privacy setting: Private (recommended) or Public
+- Continue button
+
+#### Screen 3: Invite Friends (Optional)
+
+- Explanation of how inviting works
+- Options:
+  - Generate invite link to share
+  - Show QR code for in-person sharing
+  - "I'll invite people later" option
+- Skip/Continue options
+
+#### Screen 4: Success & Next Steps
+
+- Congratulations message
+- League created successfully
+- Quick tips for next steps:
+  - How to start your first game
+  - How to invite more members
+  - Where to find league settings
+- "Start First Game" or "Go to League Dashboard" buttons
+
+### 12.4 League Joining Flow (Invited Users)
+
+For users who choose to join an existing league:
+
+#### Screen 1: Join Method Selection
+
+- QR code scanner option
+- Text input for league code/invite link
+- Example of what codes look like
+- Clear instructions
+
+#### Screen 2: League Preview
+
+- League name and description
+- Current member count
+- Admin information
+- Privacy/public status
+- Join/Cancel buttons
+
+#### Screen 3: Join Confirmation
+
+- Welcome to [League Name] message
+- Brief overview of what they can do now
+- "Go to League" button
+
+### 12.5 Tutorial System
+
+#### Progressive Disclosure Tutorials
+
+- **Context-sensitive help**: Small tutorial overlays appear when users first access major features
+- **Interactive tutorials**: Step-by-step guides for complex processes like starting a session
+- **Help center integration**: Easily accessible from any screen
+
+#### Key Tutorial Topics
+
+1. **Starting Your First Game Session**
+
+   - How to become Game Admin
+   - Recording buy-ins and cash-outs
+   - Ending a session
+
+2. **Understanding Statistics**
+
+   - Reading profit/loss charts
+   - Interpreting leaderboards
+   - Accessing detailed player stats
+
+3. **League Management**
+   - Inviting new members
+   - Managing roles and permissions
+   - League settings overview
+
+### 12.6 Onboarding Completion Tracking
+
+#### Progress Indicators
+
+- Track completion of key onboarding milestones
+- Show progress indicators where appropriate
+- Celebrate completed steps
+
+#### Key Milestones
+
+1. ✓ Account created and authenticated
+2. ✓ Nickname set (optional but tracked)
+3. ✓ First league created or joined
+4. ✓ First game session participated in
+5. ✓ First statistics viewed
+
+#### Re-engagement for Incomplete Onboarding
+
+- Gentle reminders for users who haven't completed key steps
+- Contextual prompts to continue onboarding when appropriate
+- No aggressive re-engagement that disrupts user experience
+
+### 12.7 Onboarding Analytics
+
+#### Key Metrics to Track
+
+- Onboarding funnel completion rates
+- Drop-off points in the flow
+- Time to complete each step
+- Most common paths through onboarding
+- Correlation between onboarding completion and long-term retention
+
+#### A/B Testing Opportunities
+
+- Different welcome tour content and length
+- Variations in first action choice presentation
+- Different levels of guidance vs. self-discovery
+
+### 12.8 Technical Implementation
+
+#### Onboarding State Management
+
+- Track onboarding progress in local storage and user profile
+- Sync onboarding state across devices
+- Handle interrupted onboarding gracefully
+
+#### Modal and Navigation Handling
+
+- Proper modal stack management
+- Deep link handling during onboarding
+- Graceful handling of app backgrounding/foregrounding
+
+#### Accessibility Considerations
+
+- Screen reader support for all onboarding content
+- Keyboard navigation support
+- High contrast mode compatibility
+- Respect for reduced motion preferences
+
+### 12.9 Onboarding Content Localization
+
+#### Multi-language Support
+
+- All onboarding content available in English and Hebrew
+- Culturally appropriate examples and terminology
+- RTL layout support for Hebrew onboarding flow
+- Region-specific default settings (currency, number formats)
+
+#### Content Guidelines
+
+- Keep text concise and action-oriented
+- Use friendly, encouraging tone
+- Avoid poker jargon for newcomers
+- Include visual aids where helpful
+
+## 13. Localization Requirements
+
+### 13.1 Supported Languages
+
+- English (default)
+- Hebrew
+
+### 13.2 Localization Implementation
+
+- All UI text elements must support translation
+- RTL (Right-to-Left) layout support for Hebrew
+- Date formatting according to locale standards
+- Number and currency formatting according to locale
+- User preference persistence for selected language
+- Dynamic language switching without app restart
+
+### 13.3 Translation Management
+
+- JSON-based translation files
+- String extraction and management workflow
+- Translation review process
+- Support for pluralization rules
+- Handling of untranslated strings
+
+### 13.4 UI Considerations for Localization
+
+- Flexible layouts to accommodate text expansion/contraction
+- RTL layout mirroring for Hebrew
+- Icon and image mirroring where culturally appropriate
+- Font support for Hebrew characters
+- Preservation of numerals in statistical displays

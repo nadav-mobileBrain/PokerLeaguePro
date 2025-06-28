@@ -8,12 +8,18 @@ interface UserState {
   errorProfile: string | null;
   fetchSupabaseProfile: (clerkId: string) => Promise<void>;
   clearSupabaseProfile: () => void;
+  onboardingCompleted: boolean;
+  setOnboardingCompleted: (completed: boolean) => void;
+  updateUserNickname: (clerkId: string, nickname: string) => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
   supabaseProfile: null,
   isLoadingProfile: false,
   errorProfile: null,
+  onboardingCompleted: false,
+
+  setOnboardingCompleted: (completed) => set({ onboardingCompleted: completed }),
 
   fetchSupabaseProfile: async (clerkId) => {
     if (!clerkId) {
@@ -73,5 +79,22 @@ export const useUserStore = create<UserState>((set) => ({
   clearSupabaseProfile: () => {
     console.log("[UserStore] Clearing Supabase profile.");
     set({ supabaseProfile: null, isLoadingProfile: false, errorProfile: null });
+  },
+
+  updateUserNickname: async (clerkId, nickname) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({ display_name: nickname })
+        .eq('clerk_id', clerkId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      set({ supabaseProfile: data as UserProfile });
+    } catch (err: any) {
+      console.error("[UserStore] Error updating nickname:", err);
+    }
   },
 }));

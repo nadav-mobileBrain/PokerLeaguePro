@@ -11,7 +11,7 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-import { useOAuth } from "@clerk/clerk-expo";
+import { useSSO } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
@@ -19,6 +19,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import appColors from "@/constants/colors";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/store/userStore";
+
+WebBrowser.maybeCompleteAuthSession();
 
 // Recommended practice, use a hook for the redirect URL
 const useWarmUpBrowser = () => {
@@ -33,7 +35,7 @@ const useWarmUpBrowser = () => {
 export default function SignInScreen() {
   useWarmUpBrowser();
   const router = useRouter();
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+  const { startSSOFlow } = useSSO();
   const [isLoading, setIsLoading] = useState(false);
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -42,7 +44,8 @@ export default function SignInScreen() {
   const handleGoogleSignIn = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const { createdSessionId, setActive, signUp } = await startOAuthFlow({
+      const { createdSessionId, setActive, signUp } = await startSSOFlow({
+        strategy: "oauth_google",
         redirectUrl: Linking.createURL("/oauth-native-callback"),
       });
 
@@ -81,7 +84,7 @@ export default function SignInScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [startOAuthFlow]);
+  }, [startSSOFlow]);
 
   const handleNicknameSubmit = async () => {
     const trimmedNickname = nickname.trim();
