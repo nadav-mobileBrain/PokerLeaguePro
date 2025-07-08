@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/clerk-expo";
 import { supabase } from "@/lib/supabaseClient"; // Use the simple client
 import { League } from "@/types/database";
+import { useUserStore } from "@/store/userStore";
 
 export function useUserLeagues() {
   const { user: clerkUser, isLoaded: isClerkLoaded } = useUser();
+  const { ensureUserProfile } = useUserStore();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
@@ -30,47 +32,13 @@ export function useUserLeagues() {
     setError(null);
 
     try {
-      // 1. Find the Supabase user ID corresponding to the Clerk ID
+      // 1. Ensure the user profile exists (create if needed)
       console.log(
-        "[useUserLeagues] Fetching Supabase user ID for Clerk ID:",
+        "[useUserLeagues] Ensuring user profile exists for Clerk ID:",
         clerkUser!.id
       );
-      const { data: supabaseUserData, error: userError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("clerk_id", clerkUser!.id) // Use non-null assertion as we check clerkUser above
-        .single();
-
-      if (userError) {
-        if (userError.code === "PGRST116") {
-          // PGRST116: "The result contains 0 rows"
-          console.warn(
-            "[useUserLeagues] Supabase user not found for Clerk ID:",
-            clerkUser.id
-          );
-          // This might happen if the webhook hasn't processed yet. Treat as no leagues found.
-          setLeagues([]);
-          setIsLoading(false);
-          return; // Exit early
-        } else {
-          console.error(
-            "[useUserLeagues] Error fetching Supabase user:",
-            userError
-          );
-          throw userError; // Throw other errors
-        }
-      }
-
-      if (!supabaseUserData?.id) {
-        console.warn(
-          "[useUserLeagues] Supabase user ID not found after fetch for Clerk ID:",
-          clerkUser.id
-        );
-        setLeagues([]);
-        setIsLoading(false);
-        return;
-      }
-      const supabaseUserId = supabaseUserData.id;
+      const userProfile = await ensureUserProfile(clerkUser!.id);
+      const supabaseUserId = userProfile.id;
       console.log("[useUserLeagues] Found Supabase User ID:", supabaseUserId);
 
       // 2. Call the RPC function to get leagues for this user

@@ -41,7 +41,7 @@ SplashScreen.preventAutoHideAsync();
 function InitialLayout() {
   const { isLoaded, isSignedIn, userId: clerkUserId } = useAuth();
   const {
-    fetchSupabaseProfile,
+    ensureUserProfile,
     clearSupabaseProfile,
     supabaseProfile,
     onboardingCompleted,
@@ -99,16 +99,18 @@ function InitialLayout() {
   useEffect(() => {
     if (isSignedIn && clerkUserId) {
       console.log(
-        "[Layout Effect] User signed in, fetching Supabase profile..."
+        "[Layout Effect] User signed in, ensuring Supabase profile..."
       );
-      fetchSupabaseProfile(clerkUserId);
+      ensureUserProfile(clerkUserId).catch((error) => {
+        console.error("[Layout Effect] Failed to ensure user profile:", error);
+      });
     } else if (!isSignedIn) {
       console.log(
         "[Layout Effect] User signed out, clearing Supabase profile..."
       );
       clearSupabaseProfile();
     }
-  }, [isSignedIn, clerkUserId, fetchSupabaseProfile, clearSupabaseProfile]);
+  }, [isSignedIn, clerkUserId, ensureUserProfile, clearSupabaseProfile]);
 
   if (!fontsLoaded || !isLoaded) {
     return null;
