@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
 import {
@@ -17,16 +20,31 @@ import "react-native-get-random-values";
 import { decode } from "base64-arraybuffer";
 import { supabase, supabaseAdmin } from "@/lib/supabaseClient";
 import { useUserStore } from "@/store/userStore";
+import { useUserProfileStats } from "@/hooks/useUserProfileStats";
+import appColors from "@/constants/colors";
+import { NeoBrutalCard } from "@/components/ui/NeoBrutalCard";
+import { NeoBrutalButton } from "@/components/ui/NeoBrutalButton";
 
 export default function ProfileScreen() {
   const { signOut, userId } = useAuth();
-  const { supabaseProfile, ensureUserProfile, updateUserAvatar } =
-    useUserStore();
+  const {
+    supabaseProfile,
+    ensureUserProfile,
+    updateUserAvatar,
+    updateUserBio,
+  } = useUserStore();
+  const { stats, isLoading: statsLoading } = useUserProfileStats(
+    supabaseProfile?.id
+  );
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(
     null
   );
   const [pendingImageUri, setPendingImageUri] = useState<string | null>(null);
+  const [bio, setBio] = useState<string>("");
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
 
   useEffect(() => {
     const initializeUserProfile = async () => {
@@ -45,6 +63,9 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (supabaseProfile?.avatar_url) {
       setAvatarUrl(supabaseProfile.avatar_url);
+    }
+    if (supabaseProfile?.bio) {
+      setBio(supabaseProfile.bio);
     }
   }, [supabaseProfile]);
 
@@ -138,89 +159,301 @@ export default function ProfileScreen() {
     setPendingImageUri(null);
   };
 
+  const handleSaveBio = async () => {
+    if (!userId) return;
+
+    setIsSavingBio(true);
+    try {
+      await updateUserBio(userId, bio);
+      setIsEditingBio(false);
+      Alert.alert("Success", "Bio updated successfully!");
+    } catch (error) {
+      console.error("Error updating bio:", error);
+      Alert.alert("Error", "Failed to update bio. Please try again.");
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
+
+  const handleCancelBioEdit = () => {
+    setBio(supabaseProfile?.bio || "");
+    setIsEditingBio(false);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `$${amount.toFixed(0)}`;
+  };
+
   const displayImageUri = pendingImageUri || avatarUrl;
   const hasPendingImage = !!pendingImageBase64;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>Profile</Text>
-      {displayImageUri && (
-        <Image source={{ uri: displayImageUri }} style={styles.avatar} />
-      )}
 
-      {!hasPendingImage ? (
-        <TouchableOpacity style={styles.button} onPress={pickImage}>
-          <Text style={styles.buttonText}>Change Profile Picture</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.saveButton]}
-            onPress={saveNewImage}>
-            <Text style={styles.buttonText}>Save New Image</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={cancelImageChange}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* Avatar Section */}
+      <NeoBrutalCard style={styles.avatarCard}>
+        {displayImageUri && (
+          <Image source={{ uri: displayImageUri }} style={styles.avatar} />
+        )}
+        <Text style={styles.displayName}>
+          {supabaseProfile?.display_name || "Anonymous Player"}
+        </Text>
 
-      <TouchableOpacity
-        style={[styles.button, styles.signOutButton]}
-        onPress={() => signOut()}>
-        <Text style={styles.buttonText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+        {!hasPendingImage ? (
+          <NeoBrutalButton
+            text="Change Picture"
+            onPress={pickImage}
+            style={styles.changeImageButton}
+          />
+        ) : (
+          <View style={styles.buttonContainer}>
+            <NeoBrutalButton
+              text="Save"
+              onPress={saveNewImage}
+              style={styles.saveButton}
+            />
+            <NeoBrutalButton
+              text="Cancel"
+              onPress={cancelImageChange}
+              style={styles.cancelButton}
+            />
+          </View>
+        )}
+      </NeoBrutalCard>
+
+      {/* Bio Section */}
+      <NeoBrutalCard style={styles.bioCard}>
+        <Text style={styles.sectionTitle}>About Me</Text>
+        {!isEditingBio ? (
+          <>
+            <Text style={styles.bioText}>
+              {bio || "No bio yet. Tell others about yourself!"}
+            </Text>
+            <NeoBrutalButton
+              text="Edit Bio"
+              onPress={() => setIsEditingBio(true)}
+              style={styles.editButton}
+            />
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={styles.bioInput}
+              value={bio}
+              onChangeText={setBio}
+              placeholder="Tell others about yourself..."
+              placeholderTextColor={appColors.lightText}
+              multiline
+              numberOfLines={4}
+            />
+            <View style={styles.buttonContainer}>
+              <NeoBrutalButton
+                text={isSavingBio ? "Saving..." : "Save"}
+                onPress={handleSaveBio}
+                disabled={isSavingBio}
+                style={styles.saveButton}
+              />
+              <NeoBrutalButton
+                text="Cancel"
+                onPress={handleCancelBioEdit}
+                style={styles.cancelButton}
+              />
+            </View>
+          </>
+        )}
+      </NeoBrutalCard>
+
+      {/* Stats Section */}
+      <NeoBrutalCard style={styles.statsCard}>
+        <Text style={styles.sectionTitle}>My Stats</Text>
+        {statsLoading ? (
+          <ActivityIndicator size="large" color={appColors.primary} />
+        ) : stats ? (
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.total_games}</Text>
+              <Text style={styles.statLabel}>Games Played</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text
+                style={[
+                  styles.statValue,
+                  stats.total_profit >= 0
+                    ? styles.profitPositive
+                    : styles.profitNegative,
+                ]}>
+                {formatCurrency(stats.total_profit)}
+              </Text>
+              <Text style={styles.statLabel}>Total Profit</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.win_rate.toFixed(1)}%</Text>
+              <Text style={styles.statLabel}>Win Rate</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {formatCurrency(stats.average_profit_per_game)}
+              </Text>
+              <Text style={styles.statLabel}>Avg Per Game</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, styles.profitPositive]}>
+                {formatCurrency(stats.best_single_game)}
+              </Text>
+              <Text style={styles.statLabel}>Best Game</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, styles.profitNegative]}>
+                {formatCurrency(stats.worst_single_game)}
+              </Text>
+              <Text style={styles.statLabel}>Worst Game</Text>
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.noStatsText}>
+            No statistics available yet. Play some games!
+          </Text>
+        )}
+      </NeoBrutalCard>
+
+      <NeoBrutalButton
+        text="Sign Out"
+        onPress={() => signOut()}
+        style={styles.signOutButton}
+      />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: appColors.background,
+  },
+  scrollContainer: {
     padding: 20,
+    alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+    color: appColors.text,
+    textAlign: "center",
+  },
+  avatarCard: {
+    alignItems: "center",
+    marginBottom: 20,
+    padding: 20,
   },
   avatar: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 15,
+    borderWidth: 4,
+    borderColor: appColors.text,
   },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-    width: "80%",
-  },
-  buttonText: {
-    color: "white",
+  displayName: {
+    fontSize: 20,
     fontWeight: "bold",
+    color: appColors.text,
+    marginBottom: 15,
+    textAlign: "center",
   },
-  signOutButton: {
-    backgroundColor: "red",
-    marginTop: 20,
+  changeImageButton: {
+    marginTop: 10,
   },
   buttonContainer: {
     flexDirection: "row",
     gap: 10,
-    width: "80%",
+    marginTop: 10,
   },
   saveButton: {
-    backgroundColor: "#28a745",
     flex: 1,
   },
   cancelButton: {
-    backgroundColor: "#6c757d",
     flex: 1,
+  },
+  bioCard: {
+    marginBottom: 20,
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: appColors.text,
+    marginBottom: 15,
+  },
+  bioText: {
+    fontSize: 16,
+    color: appColors.lightText,
+    lineHeight: 22,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  editButton: {
+    alignSelf: "center",
+  },
+  bioInput: {
+    borderWidth: 2,
+    borderColor: appColors.text,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: appColors.text,
+    backgroundColor: appColors.card,
+    marginBottom: 15,
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  statsCard: {
+    marginBottom: 20,
+    padding: 20,
+  },
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  statItem: {
+    width: "48%",
+    alignItems: "center",
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: appColors.card,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: appColors.text,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: appColors.text,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: appColors.lightText,
+    textAlign: "center",
+  },
+  profitPositive: {
+    color: appColors.buttonSuccess,
+  },
+  profitNegative: {
+    color: appColors.accentRed,
+  },
+  noStatsText: {
+    fontSize: 16,
+    color: appColors.lightText,
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  signOutButton: {
+    marginTop: 20,
+    alignSelf: "center",
   },
 });

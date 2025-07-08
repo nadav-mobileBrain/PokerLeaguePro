@@ -21,6 +21,7 @@ export interface UserProfile {
   clerk_id: string; // Clerk's user ID
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null; // Biographical information
   created_at: string; // Timestamptz
   updated_at: string; // Timestamptz
   // Add other fields as needed
