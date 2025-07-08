@@ -79,6 +79,13 @@ export default function TabLayout() {
           // headerShown: true,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+        }}
+      />
       {/* Hidden league detail screen */}
       <Tabs.Screen
         name="league/[leagueId]"
