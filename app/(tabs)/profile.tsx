@@ -27,12 +27,8 @@ import { NeoBrutalButton } from "@/components/ui/NeoBrutalButton";
 
 export default function ProfileScreen() {
   const { signOut, userId } = useAuth();
-  const {
-    supabaseProfile,
-    ensureUserProfile,
-    updateUserAvatar,
-    updateUserBio,
-  } = useUserStore();
+  const { supabaseProfile, ensureUserProfile, updateUserAvatar } =
+    useUserStore();
   const { stats, isLoading: statsLoading } = useUserProfileStats(
     supabaseProfile?.id
   );
@@ -42,9 +38,6 @@ export default function ProfileScreen() {
     null
   );
   const [pendingImageUri, setPendingImageUri] = useState<string | null>(null);
-  const [bio, setBio] = useState<string>("");
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [isSavingBio, setIsSavingBio] = useState(false);
 
   useEffect(() => {
     const initializeUserProfile = async () => {
@@ -63,9 +56,6 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (supabaseProfile?.avatar_url) {
       setAvatarUrl(supabaseProfile.avatar_url);
-    }
-    if (supabaseProfile?.bio) {
-      setBio(supabaseProfile.bio);
     }
   }, [supabaseProfile]);
 
@@ -159,27 +149,6 @@ export default function ProfileScreen() {
     setPendingImageUri(null);
   };
 
-  const handleSaveBio = async () => {
-    if (!userId) return;
-
-    setIsSavingBio(true);
-    try {
-      await updateUserBio(userId, bio);
-      setIsEditingBio(false);
-      Alert.alert("Success", "Bio updated successfully!");
-    } catch (error) {
-      console.error("Error updating bio:", error);
-      Alert.alert("Error", "Failed to update bio. Please try again.");
-    } finally {
-      setIsSavingBio(false);
-    }
-  };
-
-  const handleCancelBioEdit = () => {
-    setBio(supabaseProfile?.bio || "");
-    setIsEditingBio(false);
-  };
-
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(0)}`;
   };
@@ -221,48 +190,6 @@ export default function ProfileScreen() {
               style={styles.cancelButton}
             />
           </View>
-        )}
-      </NeoBrutalCard>
-
-      {/* Bio Section */}
-      <NeoBrutalCard style={styles.bioCard}>
-        <Text style={styles.sectionTitle}>About Me</Text>
-        {!isEditingBio ? (
-          <>
-            <Text style={styles.bioText}>
-              {bio || "No bio yet. Tell others about yourself!"}
-            </Text>
-            <NeoBrutalButton
-              text="Edit Bio"
-              onPress={() => setIsEditingBio(true)}
-              style={styles.editButton}
-            />
-          </>
-        ) : (
-          <>
-            <TextInput
-              style={styles.bioInput}
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Tell others about yourself..."
-              placeholderTextColor={appColors.lightText}
-              multiline
-              numberOfLines={4}
-            />
-            <View style={styles.buttonContainer}>
-              <NeoBrutalButton
-                text={isSavingBio ? "Saving..." : "Save"}
-                onPress={handleSaveBio}
-                disabled={isSavingBio}
-                style={styles.saveButton}
-              />
-              <NeoBrutalButton
-                text="Cancel"
-                onPress={handleCancelBioEdit}
-                style={styles.cancelButton}
-              />
-            </View>
-          </>
         )}
       </NeoBrutalCard>
 
@@ -378,37 +305,11 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
   },
-  bioCard: {
-    marginBottom: 20,
-    padding: 20,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: appColors.text,
     marginBottom: 15,
-  },
-  bioText: {
-    fontSize: 16,
-    color: appColors.lightText,
-    lineHeight: 22,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  editButton: {
-    alignSelf: "center",
-  },
-  bioInput: {
-    borderWidth: 2,
-    borderColor: appColors.text,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: appColors.text,
-    backgroundColor: appColors.card,
-    marginBottom: 15,
-    minHeight: 100,
-    textAlignVertical: "top",
   },
   statsCard: {
     marginBottom: 20,
