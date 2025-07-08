@@ -23,6 +23,10 @@ export default function ProfileScreen() {
   const { supabaseProfile, ensureUserProfile, updateUserAvatar } =
     useUserStore();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(
+    null
+  );
+  const [pendingImageUri, setPendingImageUri] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeUserProfile = async () => {
@@ -69,7 +73,8 @@ export default function ProfileScreen() {
       console.log("Image picker result received");
 
       if (!result.canceled && result.assets[0].base64) {
-        uploadAvatar(result.assets[0].base64);
+        setPendingImageBase64(result.assets[0].base64);
+        setPendingImageUri(result.assets[0].uri);
       }
     } catch (e) {
       console.error("Error in pickImage:", e);
@@ -120,13 +125,48 @@ export default function ProfileScreen() {
     }
   };
 
+  const saveNewImage = async () => {
+    if (pendingImageBase64) {
+      await uploadAvatar(pendingImageBase64);
+      setPendingImageBase64(null);
+      setPendingImageUri(null);
+    }
+  };
+
+  const cancelImageChange = () => {
+    setPendingImageBase64(null);
+    setPendingImageUri(null);
+  };
+
+  const displayImageUri = pendingImageUri || avatarUrl;
+  const hasPendingImage = !!pendingImageBase64;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
-      {avatarUrl && <Image source={{ uri: avatarUrl }} style={styles.avatar} />}
-      <TouchableOpacity style={styles.button} onPress={pickImage}>
-        <Text style={styles.buttonText}>Change Profile Picture</Text>
-      </TouchableOpacity>
+      {displayImageUri && (
+        <Image source={{ uri: displayImageUri }} style={styles.avatar} />
+      )}
+
+      {!hasPendingImage ? (
+        <TouchableOpacity style={styles.button} onPress={pickImage}>
+          <Text style={styles.buttonText}>Change Profile Picture</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.saveButton]}
+            onPress={saveNewImage}>
+            <Text style={styles.buttonText}>Save New Image</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.cancelButton]}
+            onPress={cancelImageChange}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <TouchableOpacity
         style={[styles.button, styles.signOutButton]}
         onPress={() => signOut()}>
@@ -169,5 +209,18 @@ const styles = StyleSheet.create({
   signOutButton: {
     backgroundColor: "red",
     marginTop: 20,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 10,
+    width: "80%",
+  },
+  saveButton: {
+    backgroundColor: "#28a745",
+    flex: 1,
+  },
+  cancelButton: {
+    backgroundColor: "#6c757d",
+    flex: 1,
   },
 });
