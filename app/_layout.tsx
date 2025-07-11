@@ -7,9 +7,16 @@ import {
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
-import { Platform, SafeAreaView } from "react-native";
+import {
+  Platform,
+  SafeAreaView,
+  Alert,
+  TouchableOpacity,
+  Text,
+  View,
+} from "react-native";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { tokenCache, webTokenCache } from "@/utils/tokenCache";
@@ -49,6 +56,8 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const [authLoopCount, setAuthLoopCount] = useState(0);
+  const [showDebugButton, setShowDebugButton] = useState(false);
   const [fontsLoaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     BlackOpsOne: require("../assets/fonts/BlackOpsOne-Regular.ttf"),
@@ -58,12 +67,22 @@ function InitialLayout() {
     console.log("[Clerk Layout Effect] Running...");
     if (!fontsLoaded || !isLoaded) {
       console.log("[Clerk Layout Effect] Waiting for Fonts/Clerk...");
+      // Track auth loops - if we're stuck here too long, show debug option
+      setAuthLoopCount((prev) => {
+        const newCount = prev + 1;
+        if (newCount > 10) {
+          setShowDebugButton(true);
+        }
+        return newCount;
+      });
       return;
     }
 
     const inAuthGroup = segments[0] === "(auth)";
 
     if (isSignedIn) {
+      setAuthLoopCount(0); // Reset loop count on successful auth
+      setShowDebugButton(false);
       if (!onboardingCompleted) {
         // If onboarding is not complete, redirect to the onboarding screen,
         // but only if not already there.
@@ -112,8 +131,81 @@ function InitialLayout() {
     }
   }, [isSignedIn, clerkUserId, ensureUserProfile, clearSupabaseProfile]);
 
+  const handleClearTokens = async () => {
+    Alert.alert(
+      "Clear Authentication",
+      "This will clear all stored authentication tokens and restart the app. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear Tokens",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await platformTokenCache.clearAllTokens();
+              clearSupabaseProfile();
+              Alert.alert("Success", "Tokens cleared. Restarting app...", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    // Force a reload by updating state
+                    setAuthLoopCount(0);
+                    setShowDebugButton(false);
+                  },
+                },
+              ]);
+            } catch (error) {
+              console.error("Failed to clear tokens:", error);
+              Alert.alert(
+                "Error",
+                "Failed to clear tokens. Please restart the app manually."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (!fontsLoaded || !isLoaded) {
-    return null;
+    return showDebugButton ? (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: appColors.background,
+          padding: 20,
+        }}>
+        <Text
+          style={{
+            color: appColors.lightText,
+            fontSize: 18,
+            textAlign: "center",
+            marginBottom: 20,
+          }}>
+          App appears to be stuck loading...
+        </Text>
+        <TouchableOpacity
+          onPress={handleClearTokens}
+          style={{
+            backgroundColor: appColors.buttonDanger,
+            padding: 15,
+            borderRadius: 8,
+            borderWidth: 2,
+            borderColor: "#000",
+          }}>
+          <Text
+            style={{
+              color: appColors.lightText,
+              fontSize: 16,
+              fontWeight: "bold",
+            }}>
+            Clear Auth & Restart
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ) : null;
   }
 
   return (

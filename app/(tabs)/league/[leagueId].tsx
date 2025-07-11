@@ -412,11 +412,36 @@ export default function LeagueDetailScreen() {
           {members.length > 0 ? (
             members.map((member) => (
               <View key={member.user_id} style={styles.memberItem}>
-                <Text style={styles.memberName}>
-                  {member.users?.display_name ||
-                    `User ${member.user_id.substring(0, 6)}`}
-                </Text>
-                <Text style={styles.memberRole}>{member.role}</Text>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>
+                    {member.users?.display_name ||
+                      `User ${member.user_id.substring(0, 6)}`}
+                  </Text>
+                  <Text style={styles.joinedAt}>
+                    Joined {new Date(member.joined_at).toLocaleDateString()}
+                  </Text>
+                </View>
+                <View style={styles.roleContainer}>
+                  <FontAwesome
+                    name={member.role === "league_admin" ? "star" : "user"}
+                    size={16}
+                    color={
+                      member.role === "league_admin"
+                        ? appColors.chipGold
+                        : appColors.secondaryText
+                    }
+                    style={styles.roleIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.memberRole,
+                      member.role === "league_admin"
+                        ? styles.adminRole
+                        : styles.memberRoleStyle,
+                    ]}>
+                    {member.role === "league_admin" ? "Admin" : "Member"}
+                  </Text>
+                </View>
               </View>
             ))
           ) : (
@@ -566,5 +591,28 @@ const styles = StyleSheet.create({
     color: appColors.secondaryText,
     textAlign: "center",
     marginTop: 10,
+  },
+  memberInfo: {
+    flex: 1,
+  },
+  joinedAt: {
+    fontSize: 12,
+    color: appColors.secondaryText,
+    marginTop: 2,
+  },
+  roleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  roleIcon: {
+    marginRight: 6,
+  },
+  adminRole: {
+    backgroundColor: appColors.warning,
+    color: appColors.background,
+  },
+  memberRoleStyle: {
+    backgroundColor: appColors.chipBlack,
+    color: appColors.lightText,
   },
 });

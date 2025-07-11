@@ -25,9 +25,34 @@ async function getToken(key: string) {
   }
 }
 
+async function deleteToken(key: string) {
+  try {
+    console.log(`[tokenCache] Attempting to delete token with key: ${key}`);
+    await SecureStore.deleteItemAsync(key);
+    console.log(`[tokenCache] Successfully deleted token with key: ${key}`);
+  } catch (err) {
+    console.error("[tokenCache] Failed to delete token", { key, error: err });
+  }
+}
+
+async function clearAllTokens() {
+  try {
+    console.log("[tokenCache] Clearing all Clerk tokens...");
+    await SecureStore.deleteItemAsync("__clerk_client_jwt");
+    await SecureStore.deleteItemAsync("__clerk_refresh_token");
+    await SecureStore.deleteItemAsync("__clerk_client_uat");
+    await SecureStore.deleteItemAsync("__clerk_session_token");
+    console.log("[tokenCache] All tokens cleared successfully");
+  } catch (err) {
+    console.error("[tokenCache] Failed to clear tokens", err);
+  }
+}
+
 export const tokenCache = {
   getToken,
   saveToken,
+  deleteToken,
+  clearAllTokens,
 };
 
 // SecureStore is not supported on the web
@@ -47,6 +72,25 @@ export const webTokenCache = {
       localStorage.setItem(key, value);
     } catch (err) {
       console.error("Failed to save token to localStorage", err);
+    }
+  },
+  async deleteToken(key: string) {
+    try {
+      localStorage.removeItem(key);
+    } catch (err) {
+      console.error("Failed to delete token from localStorage", err);
+    }
+  },
+  async clearAllTokens() {
+    try {
+      console.log("[webTokenCache] Clearing all Clerk tokens...");
+      localStorage.removeItem("__clerk_client_jwt");
+      localStorage.removeItem("__clerk_refresh_token");
+      localStorage.removeItem("__clerk_client_uat");
+      localStorage.removeItem("__clerk_session_token");
+      console.log("[webTokenCache] All tokens cleared successfully");
+    } catch (err) {
+      console.error("Failed to clear tokens from localStorage", err);
     }
   },
 };

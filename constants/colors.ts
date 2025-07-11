@@ -53,6 +53,7 @@ const appColors = {
   pokerChipPrimary: "#FF453A", // Red chip
   pokerChipSecondary: "#30D158", // Green chip
   pokerChipTertiary: "#0A84FF", // Blue chip
+  chipGold: "#FFD700", // Gold chip for special roles/admin
 
   // Functional Colors
   tabBarBackground: "#1C1C1E",

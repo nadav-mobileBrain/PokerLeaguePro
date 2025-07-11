@@ -31,7 +31,7 @@ export interface UserProfile {
 export interface LeagueMember {
   league_id: string;
   user_id: string;
-  role: "league_admin" | "member" | "viewer"; // Use specific roles
+  role: "league_admin" | "member"; // Simplified role system
   joined_at: string;
   // Include the joined user profile data
   users: UserProfile | null;
